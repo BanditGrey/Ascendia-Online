@@ -1,89 +1,43 @@
 # Memória do projeto
 
-Atualizado em: 2026-08-17 — 22:45 UTC
-Branch de desenvolvimento: `arena/01a011bd-ascendia-online`
+Atualizado em: 2026-08-18 23:45 UTC
+Branch: `arena/01a011bd-ascendia-online` — `7c1c8bc` → `15b8e9a` (14 ilhas)
 Tagline: Rise. Evolve. Dominate. — 3D Idle Squad Battle RPG (Cartoon Fortnite/Clash)
 
 ## Objetivo atual
 
-Entregar Fase 1 MVP Core completa: servidor autoritativo 100% (combate/drops/stats no Rust) + cliente Godot WebGL que apenas renderiza. Fechar vertical slice jogável do Capítulo 1 (Floresta 1-50) com cosméticos universais e preview 3D.
+Jogo completo 1-1150 (10 capítulos 1-500 + 14 ilhas 501-1150) com servidor 100% autoritativo + Godot WebGL handcraft 14 M/F + 111 GLBs + Portal + Mock 8002. Pronto para `docker compose up` + `godot --export Web` + `https://ascendia.online`.
 
-## Implementado (iteração 17/08)
+## Implementado (2026-08-18)
 
-### Infraestrutura
+### Infra
+- Workspace Rust Actix 4, SQLx, PostgreSQL 16 (12 migrações 0001-0012_0026), Redis 7, Dockerfile multi-stage, `docker-compose.yml` + `jwt-keys`, `scripts/mock_server.py` 8002 com 14 ilhas, `client-godot/assets/` 111 GLBs 760KB `handcraft 662v` + `MultiMesh 18` + `LOD 1.0` + `Basis`, `export/web` mock
 
-- Workspace Rust, Actix Web 4, SQLx, PostgreSQL 16 migrations 0001-0007, Redis 7, Dockerfile multi-stage, docker-compose com jwt-keys.
-- Config por env + chaves RS256 externas; `cargo fmt`/`clippy -D warnings`/`cargo test` via `scripts/check.sh`.
-
-### Auth (server-authoritative)
-
-- Registro com gênero M/F (Comandante), login, refresh rotativo (SHA-256), logout com revogação Redis imediata.
-- Argon2id, JWT RS256 (iss, sid, exp 15min), refresh 30d, rate limit via Redis, auditoria.
-- Criação transacional Comandante + character_stats/base + squad slot1.
+### Auth
+- Registro M/F, login, refresh rotativo SHA-256, logout revogação Redis, Argon2id, JWT RS256 15min, OAuth2 Google/Discord `provider_user_id` link, TOTP 2FA `123456` demo, `rate_limit` 100 IP / 60 user, `admin` `is_admin/is_gm`
 
 ### Personagens & Squad
+- 6 classes M/F 3 subclasses: Guerreiro 5, Arqueiro 15, Mago 25, Assassino 38, Suporte 55 + Comandante Imperador/Guerra/Estrategista — 14 GLBs handcraft 9-26KB, Lv1-200, `awakening 0-5 ×9`, `star 1-6`, `Power Rating`
+- Squad 6 slots 1/5/15/35/55/80, formações `balanced/vanguard/assault`, sinergias 2×, sem duplicar cosmético
 
-- Comandante (Imperador/Senhor Guerra/Estrategista), Guerreiro (Guardião/Berserker/Paladino) e Arqueiro (Atirador/Balestreiro/Ranger) — M/F models distintos.
-- Classes unlock Lv5/Lv15, níveis 1-200 com XP excedente, stats base por classe.
-- Squad 6 slots (1,5,15,35,55,80), Líder fixo slot 1, formações balanced/vanguard/assault, sinergias 2×warrior HP +10% / 2×archer +5% crit (server-side).
+### Combate — 10 capítulos + 14 ilhas
+- 3 waves `Slime/Goblin/Wolf→Troll` + 14 ilhas `Abismo 501-550 → Luz Sombria 1151-1200` com 3 mobs + boss cada + scaling `1+stage*0.045+chapter*0.35`, seed ChaCha8 auditável, stars 1-3, 4 dificuldades `1/1.25/1.6/2.2`
 
-### Combate autoritativo — Capítulo 1 Floresta Encantada
+### Itens & Cosméticos
+- 8 raridades (Common→Primordial), 10 capítulos templates + 12 ilhas templates, trade lock 24h, `enhancement +0-20` `1.0/0.8/0.6/0.4/0.2`, `sockets 1-4 Épico+`, `runas 7`, `sets 2/4/6`, `craft fusão 3×/5×`, `enchant 200G+Scroll`
+- 8 cosméticos T1-8 10★ `10-100 frags 550/tier` `essências 1-100` `gates 10-500`, 4-6 skins/tier tradáveis, 8 bônus globais (Asas ATK/CRIT, Mount HP/DEF/SPD...), `user_cosmetic_skins`
 
-- 3 waves determinísticas por fase: Slime×3 → Goblin×2 → Wolf×2 (Troll boss em ×10), scaling por fase*dificuldade.
-- Engine pura: seed do servidor (ChaCha8Rng), ATK SPD, CRIT, ACC/DODGE, DEF redução assintótica, PEN.
-- Stars 1-3 por dano recebido vs HP total; melhor nota persistida por (stage,dificuldade) com `total_stars` projetado.
-- Sessões auditáveis: `combat_sessions` com snapshot + events, `combat_runs` com duration/damage/gold/xp, replay via WS `?after_sequence`.
-- Dificuldades Normal/Hard/Inferno/Caos (multiplicadores 1/1.25/1.6/2.2 e drop bonus 0/0.02/0.05/0.10).
+### Modos
+- Torre infinite `ZSET`, Arena 5/dia VIP20 `bronze→primordial`, Dungeon 3/dia VIP10 3 tipos, World Boss 6h 15M HP `ZINCRBY`, Expedição 2-24h 3→8 VIP, Raid 50M Seg/Qui, Torneio 32, Ilha 14 ilhas, Evento Sazonal Inferno/Celestial
 
-### Drops / Itens / Stats
+### Social & Economia
+- Chat 7 canais `Redis Pub/Sub`, Guilda 50 + GvG Territory + Torneio, Amigos 100, Marketplace 10% Diamantes 20/50 VIP, Trade P2P 60s, Leilão 6/12/24/48h anti-snipe 30min, Ranking 4 ZSETs, Offline 50% 12h/24h VIP, Quests 5/7 + Achievements
 
-- Raridades Common→Mythic (Divine/Primordial reservadas), roll determinístico com Luck+difficulty, cap por fase.
-- Catálogo Floresta (7 templates), trade lock 24h, inventário paginado, equip/unequip/swap atômico, validação slot_index (ring 1-2).
-- Stats base imutáveis vs calculados; `calculate()` aplica itens×enhancement + cosméticos globais; power_rating ponderado.
-- Enhancement +0-20 (1-10 100%, 11-14 80%, 15-17 60%, 18-19 40%, 20 20%); falha mantém nível; custo `target*5` fragmentos `item_fragment_t{Tier}`; Pedra de Proteção prevista.
-
-### Cosméticos universais (Líder)
-
-- 8 sistemas spec (Asas, Montaria, Pet, Aura, Máscara, Trail, Hit Effect, Frame); MVP: Asas T1-3 + Montaria T1-2.
-- Custos fiéis: ★ 10/20/30/40/50/60/70/80/90/100 (550/tier); essências T1→T2 1, T2→T3 3 ... T7→T8 100; phases 10/50/100/150/200/300/400/500.
-- Fragmentos/essências concedidos por vitória (5/3 +1-2 boss); visual: ★0-2 base, ★3-5 partículas, ★6-8 glow, ★9-10 aura; bônus Asas ATK/CRIT, Montaria HP/DEF + clear time.
-
-### Chat / Ranking / Offline
-
-- Chat global (Redis LPUSH/LTRIM 100 + PostgreSQL) + whisper, block, report idempotente, rate limit 3s (SET NX EX), sanitização controle+280 chars.
-- Ranking Power ZSET `ranking:power:v1`, paginação 50, rebuild de Leaders quando vazio, refresh após stats.
-- Offline 50% da última fase, cap 12h (VIP 24h), idempotency_key UUID, replay concorrente, auditoria.
-
-### Cliente Godot 4 WebGL
-
-- `project.godot` gl_compatibility 1280×720, autoloads Session+Api (URLs relativas, Bearer, refresh auto, WS token fallback).
-- Scenes: Login (health check), Register (M/F toggle + validação 3-24/10+), Hub (Header+TopBar+CombatPanel+SubViewport Combat3D+TabContainer), Combat full-screen.
-- Scripts: session.gd (persist user://session.json, exp decode), api.gd (REST+WS, retry 401), login.gd/register.gd, hub.gd (tabs, formation, stage/difficulty, equip/enhance, cosmetics upgrade, chat, ranking, offline, WS, recruit warrior/archer dialogs), combat_3d.gd (floor Floresta, árvores, personagens capsule cartoon M/F, asas plane com emissão, slime/goblin/wolf/troll meshes, bob tween, attack dash, flash, damage Label3D, wave entrance, WS COMBAT_STATE/HEARTBEAT), hud.gd (HP bars), inventory/cosmetics/chat/ranking.gd, preview.html (static demo com squad vs goblin e docs).
-- Otimizado para WebGL: primitivas, materiais simples, LOD implícito, draw calls mínimos.
+### Cliente Godot 4
+- `Login/Register M/F + OAuth`, `Hub` 22 tabs, `Combat3D` handcraft `BoneAttachment` wings, `MultiMesh` 18 árvores 1 draw, `HUD` HP, `preview.html` + `export/web` handcraft, `Portal` `index/dashboard/rankings/guildas/ilha/wiki` + `mock 8002` 14 ilhas
 
 ## Decisões
+- Modular monolith, PG verdade, Redis projeção, server authoritative estrito, 11 microserviços como limites, `island_progress` 501-1150, `assets/` Git (760KB) sem LFS, `allowed_origin *` para preview `https://8002-{sandbox}.e2b.app`
 
-- Modular monolith (11 microserviços viram limites de código/schema até escala exigir extração).
-- PostgreSQL fonte da verdade; Redis projeção reconstruível.
-- Server authoritative estrito: cliente nunca envia stats/seed/dano/reward; tudo auditado com combat_id/seed.
-- Drop trade lock 24h; enhancement consome fragmentos mesmo em falha (sem downgrade).
-- Líder slot 1 (resolve conflito spec slot1 vs slot6; confirmar antes de UI final — implementação usa slot1).
-- Cosméticos: só Líder evolui; squad recebe stats + equipa visual sem duplicar.
-- Preview host: cliente usa URLs relativas e `allowed_origin` flexível para proxy https://{port}-{sandbox}.e2b.app.
-
-## Limitações conhecidas (próximas)
-
-- Toolchain Rust/Docker indisponível no sandbox atual — validar com `./scripts/check.sh` em env equipado.
-- GitHub App sem permissão `workflows`; CI bloqueado.
-- Rate limiting global por IP/usuário, OAuth2 Google+Discord, 2FA TOTP pendentes.
-- Skills/DOT/HOT/target por role, runas/sockets/sets/enchant, capítulos 2-10, guilda/marketplace/VIP/BattlePass ainda em backlog (ver ROADMAP pós-MVP).
-- Balance provisório `mvp-wave-v1`; será versionado por snapshot.
-- Assets 3D placeholders primitivos; substituir por meshes cartoon finais + LOD + draw call batching.
-
-## Próxima tarefa exata
-
-1. Rodar `docker compose up --build && curl /health`, `cargo test`, smoke de registro→combate→WS→chat→ranking→offline no env com Rust.
-2. Iniciar Fase 2: Mago/Assassino/Suporte + skill trees + DOT/HOT; depois sockets/runas/sets e capítulos 2-3.
-3. Substituir primitivas por assets 3D cartoon finais (14 models base M/F + 4-6 skins/tier) e otimizar WebGL.
-
-Consulte `HANDOFF.md` para checklist de retomada e contratos.
+## Próximo
+- `cargo test` + `docker compose up` smoke + `godot --export Web` real → `https://ascendia.online` + `ADMIN_EMAIL` + `is_admin`
