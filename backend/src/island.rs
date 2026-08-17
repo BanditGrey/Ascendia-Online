@@ -38,6 +38,8 @@ async fn status(state: web::Data<Arc<AppState>>, user: AuthenticatedUser) -> App
     let (unlocked_final, island_max_final) = prog_final.unwrap_or((false,900));
     let prog_supreme: Option<(bool,i16)> = sqlx::query_as("SELECT unlocked, max_stage FROM island_progress WHERE user_id=$1 AND island_code='supreme_void'").bind(user.user_id).fetch_optional(&state.db).await?;
     let (unlocked_supreme, island_max_supreme) = prog_supreme.unwrap_or((false,950));
+    let prog_dream: Option<(bool,i16)> = sqlx::query_as("SELECT unlocked, max_stage FROM island_progress WHERE user_id=$1 AND island_code='dream'").bind(user.user_id).fetch_optional(&state.db).await?;
+    let (unlocked_dream, island_max_dream) = prog_dream.unwrap_or((false,1000));
     let prog_final: Option<(bool,i16)> = sqlx::query_as("SELECT unlocked, max_stage FROM island_progress WHERE user_id=$1 AND island_code='final_abyss'").bind(user.user_id).fetch_optional(&state.db).await?;
     let (unlocked_final, island_max_final) = prog_final.unwrap_or((false,900));
     Ok(HttpResponse::Ok().json(serde_json::json!([
@@ -51,7 +53,8 @@ async fn status(state: web::Data<Arc<AppState>>, user: AuthenticatedUser) -> App
         {"island":"origin","name":"Origem Primordial","range":"851-900","theme":"Origem primordial com o Criador","requirement":"Fase 850 + 30000 Gold + VIP 15 + Despertar 5 + Power 50000","max_stage":max_stage,"vip":vip,"awak":awak,"can_unlock":unlocked_eternity && max_stage>=850 && gold>=30000 && vip>=15 && awak>=5,"unlocked":unlocked_origin,"island_max":island_max_origin,"mobs":["origin_horror","origin_wraith","origin_spawn"],"boss":"O Criador 900","loot":"Lâmina da Origem, Armadura Primordial, Coroa do Criador"},
         {"island":"final_abyss","name":"Abismo Final","range":"901-950","theme":"Abismo final com vazio","requirement":"Fase 900 + 35000 Gold + VIP 15 + Despertar 5 + Power 75000","max_stage":max_stage,"vip":vip,"awak":awak,"can_unlock":unlocked_origin && max_stage>=900 && gold>=35000 && vip>=15 && awak>=5,"unlocked":unlocked_final,"island_max":island_max_final,"mobs":["final_horror","final_wraith","final_spawn"],"boss":"Abismo Final 950","loot":"Lâmina do Abismo Final, Armadura Final, Coroa Final"},
         {"island":"supreme_void","name":"Vazio Supremo","range":"951-1000","theme":"Vazio supremo com trono","requirement":"Fase 950 + 40000 Gold + VIP 15 + Despertar 5 + Power 100000","max_stage":max_stage,"vip":vip,"awak":awak,"can_unlock":unlocked_final && max_stage>=950 && gold>=40000 && vip>=15 && awak>=5,"unlocked":false,"island_max":950,"mobs":["supreme_horror","supreme_wraith","supreme_spawn"],"boss":"Vazio Supremo 1000","loot":"Lâmina Suprema, Armadura Suprema, Coroa Suprema"},
-        {"island":"dream","name":"Sonho Lúcido","range":"1001-1050","theme":"Sonho lúcido com bolhas","requirement":"Fase 1000 + 45000 Gold + VIP 15 + Despertar 5 + Power 120000","max_stage":max_stage,"vip":vip,"awak":awak,"can_unlock":false,"island_max":1000,"mobs":["dream_horror","dream_wraith","dream_spawn"],"boss":"Sonho Lúcido 1050","loot":"Lâmina Onírica, Armadura Onírica, Coroa do Sonho"}
+        {"island":"dream","name":"Sonho Lúcido","range":"1001-1050","theme":"Sonho lúcido com bolhas","requirement":"Fase 1000 + 45000 Gold + VIP 15 + Despertar 5 + Power 120000","max_stage":max_stage,"vip":vip,"awak":awak,"can_unlock":unlocked_supreme && max_stage>=1000 && gold>=45000 && vip>=15 && awak>=5,"unlocked":false,"island_max":1000,"mobs":["dream_horror","dream_wraith","dream_spawn"],"boss":"Sonho Lúcido 1050","loot":"Lâmina Onírica, Armadura Onírica, Coroa do Sonho"},
+        {"island":"nightmare","name":"Pesadelo Lúcido","range":"1051-1100","theme":"Pesadelo lúcido com sombras","requirement":"Fase 1050 + 50000 Gold + VIP 15 + Despertar 5 + Power 150000","max_stage":max_stage,"vip":vip,"awak":awak,"can_unlock":false,"island_max":1050,"mobs":["nightmare_horror","nightmare_wraith","nightmare_spawn"],"boss":"Pesadelo Lúcido 1100","loot":"Lâmina do Pesadelo, Armadura do Pesadelo, Coroa do Pesadelo"}
     ])))
 }
 
@@ -61,7 +64,7 @@ async fn unlock(state: web::Data<Arc<AppState>>, user: AuthenticatedUser) -> App
 
 async fn unlock_specific(state: web::Data<Arc<AppState>>, user: AuthenticatedUser, island_code: web::Path<String>) -> AppResult<HttpResponse> {
     let code = island_code.into_inner();
-    let allowed = ["abyss_island","golden_kingdom","void_star","eclipse","storm","time_labyrinth","eternity","origin","final_abyss"];
+    let allowed = ["abyss_island","golden_kingdom","void_star","eclipse","storm","time_labyrinth","eternity","origin","final_abyss","supreme_void","dream","nightmare"];
     if !allowed.contains(&code.as_str()) { return Err(AppError::Validation("ilha inválida".into())); }
     let mut tx = state.db.begin().await?;
     let max_stage: i16 = sqlx::query_scalar("SELECT COALESCE(max_stage,0)::smallint FROM stage_progress WHERE user_id=$1 FOR UPDATE").bind(user.user_id).fetch_one(&mut *tx).await?;
