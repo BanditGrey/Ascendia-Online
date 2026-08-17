@@ -4,6 +4,7 @@ mod config;
 mod error;
 mod http;
 mod inventory;
+mod player;
 mod state;
 
 use std::sync::Arc;
@@ -31,7 +32,7 @@ async fn main() -> AppResult<()> {
             .wrap(cors)
             .wrap(Logger::default())
             .route("/health", web::get().to(http::health::health))
-            .service(web::scope("/api/v1").configure(auth::routes::configure).configure(combat::routes::configure).configure(inventory::routes::configure))
+            .service(web::scope("/api/v1").configure(auth::routes::configure).configure(combat::routes::configure).configure(inventory::routes::configure).configure(player::routes::configure))
     })
     .bind(bind).map_err(|e| error::AppError::Config(format!("bind: {e}")))?
     .run().await.map_err(|e| error::AppError::Internal(format!("servidor: {e}")))

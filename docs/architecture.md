@@ -37,10 +37,11 @@ O endpoint atual resolve um duelo agregado para validar a vertical slice. O incr
 ## Próximos incrementos
 
 1. **Items + Inventory + Stats (em andamento)**: drop persistido, equip/unequip com ownership, enhancement e cálculo de Power Rating estão implementados. Affixes, sockets, runas, sets e enchant vêm no próximo incremento de itens.
-2. **Combat session**: 3–5 waves, Slime/Goblin/Lobo, Troll a cada 10 fases, skills automáticas e snapshot de balanceamento.
-3. **WebSocket**: autenticação no upgrade, sequência monotônica, heartbeat, `COMBAT_STATE`, `ITEM_DROP` e retomada.
-4. **Offline rewards**: lease distribuído, cálculo pela última fase concluída, teto de 12h e claim idempotente.
-5. **Godot**: networking separado da apresentação, interpolação de estado e placeholders 3D WebGL.
-6. **Chat/ranking**: Redis Pub/Sub e ZSET como projeções reconstruíveis do PostgreSQL.
+2. **Characters + Squad (parcial)**: criação de Guerreiro/Arqueiro, subclasses, XP/level e slots progressivos estão implementados. Skill trees, star rating e awakening ainda serão adicionados.
+3. **Combat session**: 3–5 waves, Slime/Goblin/Lobo, Troll a cada 10 fases, skills automáticas e snapshot de balanceamento.
+4. **WebSocket**: autenticação no upgrade, sequência monotônica, heartbeat, `COMBAT_STATE`, `ITEM_DROP` e retomada.
+5. **Offline rewards**: lease distribuído, cálculo pela última fase concluída, teto de 12h e claim idempotente.
+6. **Godot**: networking separado da apresentação, interpolação de estado e placeholders 3D WebGL.
+7. **Chat/ranking**: Redis Pub/Sub e ZSET como projeções reconstruíveis do PostgreSQL.
 
 Antes de exposição pública: rate limiting Redis por IP/usuário, revogação imediata de access sessions, CSP/origin restrito, métricas, tracing, backups e secret manager.

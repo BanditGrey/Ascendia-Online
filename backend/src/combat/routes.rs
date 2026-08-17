@@ -5,7 +5,7 @@ use rand::Rng;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{auth::middleware::AuthenticatedUser, combat::{drops::{roll_rarity, Rarity}, engine::{duel, enemy_for_stage, FighterStats}}, error::{AppError, AppResult}, state::AppState};
+use crate::{auth::middleware::AuthenticatedUser, combat::{drops::{roll_rarity, Rarity}, engine::{duel, enemy_for_stage, FighterStats}}, error::{AppError, AppResult}, player::progression::grant_leader_experience, state::AppState};
 
 #[derive(Debug, Deserialize)]
 pub struct StartCombat { pub stage: u16, pub difficulty: Difficulty }
@@ -24,6 +24,7 @@ pub struct StageResult {
     pub experience: i64,
     pub seed: u64,
     pub drop_rarity: Option<Rarity>,
+    pub level_up: Option<i16>,
 }
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
@@ -77,18 +78,20 @@ async fn start(state: web::Data<Arc<AppState>>, user: AuthenticatedUser, body: w
         sqlx::query("INSERT INTO inventory_items (user_id,template_id,trade_locked_until) SELECT $1,id,now()+interval '24 hours' FROM item_templates WHERE code=$2")
             .bind(user.user_id).bind(rarity.code()).execute(&mut *tx).await?;
     }
+    let mut level_up = None;
     if result.victory {
         sqlx::query("INSERT INTO stage_progress (user_id,max_stage,total_stars) VALUES ($1,$2,1) ON CONFLICT (user_id) DO UPDATE SET max_stage=GREATEST(stage_progress.max_stage,EXCLUDED.max_stage), total_stars=stage_progress.total_stars+CASE WHEN EXCLUDED.max_stage>stage_progress.max_stage THEN 1 ELSE 0 END, updated_at=now()")
             .bind(user.user_id).bind(body.stage as i32).execute(&mut *tx).await?;
         sqlx::query("UPDATE users SET gold=gold+$2 WHERE id=$1").bind(user.user_id).bind(gold).execute(&mut *tx).await?;
         sqlx::query("INSERT INTO player_materials (user_id,material_code,quantity) VALUES ($1,'item_fragment_t1',1) ON CONFLICT (user_id,material_code) DO UPDATE SET quantity=player_materials.quantity+1,updated_at=now()")
             .bind(user.user_id).execute(&mut *tx).await?;
+        level_up = grant_leader_experience(&mut tx, user.user_id, experience).await?;
     }
     sqlx::query("INSERT INTO audit_logs (actor_user_id,action,metadata) VALUES ($1,'COMBAT_RESOLVED',$2)")
         .bind(user.user_id).bind(serde_json::json!({"combat_id":combat_id,"stage":body.stage,"victory":result.victory,"seed":seed})).execute(&mut *tx).await?;
     tx.commit().await?;
 
-    Ok(HttpResponse::Ok().json(StageResult { combat_id, stage: body.stage, victory: result.victory, duration_ms: result.duration_ms, gold, experience, seed, drop_rarity }))
+    Ok(HttpResponse::Ok().json(StageResult { combat_id, stage: body.stage, victory: result.victory, duration_ms: result.duration_ms, gold, experience, seed, drop_rarity, level_up }))
 }
 
 fn difficulty_name(value: &Difficulty) -> &'static str {

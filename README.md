@@ -88,6 +88,19 @@ POST /api/v1/inventory/enhance
 
 Equipar, substituir, desequipar, consumir fragmentos e recalcular stats acontece dentro de uma única transação PostgreSQL. IDs, ownership, tipo e índice do slot são validados no servidor.
 
+### Personagens e squad
+
+```text
+GET  /api/v1/characters
+POST /api/v1/characters
+     { "name": "Aegis", "gender": "male", "class": "warrior", "subclass": "guardian" }
+GET  /api/v1/squad
+PUT  /api/v1/squad/slot
+     { "slot": 2, "character_id": "..." }
+```
+
+Guerreiro desbloqueia no level 5 e Arqueiro no level 15. Os slots respeitam os níveis 1, 5, 15, 35, 55 e 80. Experiência de vitórias é aplicada ao Líder no servidor e pode subir múltiplos níveis sem perder XP excedente.
+
 ## Testes
 
 ```bash
