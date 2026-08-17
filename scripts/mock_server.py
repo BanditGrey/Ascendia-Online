@@ -63,7 +63,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 self.send_json({"season":{"name":"Season 1 — Inferno","starts_at":"2026-08-18","ends_at":"2026-09-17"},"progress":{"level":5,"xp":5200,"premium":False},"next_level_xp":6000})
                 return
             if path.startswith("/api/v1/island/status"):
-                self.send_json([{"island":"abyss_island","name":"Ilha do Abismo Profundo","range":"501-550","max_stage":500,"gold":5200,"can_unlock":True,"unlocked":False,"island_max":501},{"island":"golden_kingdom","name":"Reino Dourado","range":"551-600","max_stage":500,"gold":5200,"vip":6,"can_unlock":False,"unlocked":False,"island_max":550}])
+                self.send_json([{"island":"abyss_island","name":"Ilha do Abismo Profundo","range":"501-550","max_stage":500,"gold":5200,"can_unlock":True,"unlocked":False,"island_max":501},{"island":"golden_kingdom","name":"Reino Dourado","range":"551-600","max_stage":500,"gold":5200,"vip":6,"can_unlock":False,"unlocked":False,"island_max":550},{"island":"void_star","name":"Vazio Estelar","range":"601-650","max_stage":600,"gold":12200,"vip":8,"can_unlock":False,"unlocked":False,"island_max":600}])
                 return
             if path.startswith("/api/v1/tower/status"):
                 self.send_json({"current_floor":12,"best_floor":15,"next_floor":16,"is_boss":False,"rewards_preview":"Fragmentos + Gold"})
