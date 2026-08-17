@@ -57,9 +57,14 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 }
 
 async fn register(state: web::Data<Arc<AppState>>, body: web::Json<RegisterRequest>, req: HttpRequest) -> AppResult<HttpResponse> {
+    // Normaliza antes de validar: espaços nas bordas não podem contornar as regras
+    // de tamanho/e-mail (ex.: "  " passaria em length(min=3) e viraria nome vazio).
+    let mut body = body.into_inner();
+    body.email = body.email.trim().to_lowercase();
+    body.display_name = body.display_name.trim().to_string();
     body.validate().map_err(|e| AppError::Validation(e.to_string()))?;
-    let email = body.email.trim().to_lowercase();
-    let display_name = body.display_name.trim();
+    let email = body.email.clone();
+    let display_name = body.display_name.as_str();
     let password_hash = hash_password(body.password.clone()).await?;
     let mut tx = state.db.begin().await?;
     let user_id = Uuid::new_v4();
@@ -97,9 +102,13 @@ async fn register(state: web::Data<Arc<AppState>>, body: web::Json<RegisterReque
 }
 
 async fn login(state: web::Data<Arc<AppState>>, body: web::Json<LoginRequest>, req: HttpRequest) -> AppResult<HttpResponse> {
+    // Normaliza o e-mail antes de validar, como no registro, para que espaços
+    // acidentais nas bordas não bloqueiem o login.
+    let mut body = body.into_inner();
+    body.email = body.email.trim().to_lowercase();
     body.validate().map_err(|e| AppError::Validation(e.to_string()))?;
     let row: Option<(Uuid, String)> = sqlx::query_as("SELECT id,password_hash FROM users WHERE email=$1 AND status='active'")
-        .bind(body.email.trim().to_lowercase()).fetch_optional(&state.db).await?;
+        .bind(body.email).fetch_optional(&state.db).await?;
     let (user_id, password_hash) = row.ok_or(AppError::InvalidCredentials)?;
     verify_password(password_hash, body.password.clone()).await?;
     let mut tx = state.db.begin().await?;

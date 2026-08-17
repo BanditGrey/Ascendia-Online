@@ -30,7 +30,7 @@ async fn upgrade(state: web::Data<Arc<AppState>>, user: AuthenticatedUser, body:
     sqlx::query("INSERT INTO cosmetic_progress (user_id,cosmetic_type) VALUES ($1,$2) ON CONFLICT DO NOTHING").bind(user.user_id).bind(kind).execute(&mut *tx).await?;
     let row: CosmeticView = sqlx::query_as("SELECT cosmetic_type,tier,stars,fragments,essences FROM cosmetic_progress WHERE user_id=$1 AND cosmetic_type=$2 FOR UPDATE").bind(user.user_id).bind(kind).fetch_one(&mut *tx).await?;
     if row.tier >= body.cosmetic_type.max_tier() && row.stars >= 10 { return Err(AppError::Validation("cosmético já está no máximo".into())); }
-    let cost = i32::from(row.tier) * (row.stars + 1) * 10;
+    let cost = i32::from(row.tier) * (i32::from(row.stars) + 1) * 10;
     if row.fragments < cost { return Err(AppError::Validation(format!("fragmentos insuficientes: são necessários {cost}"))); }
     let tier_up = row.stars == 9 && row.tier < body.cosmetic_type.max_tier();
     let stars = if tier_up { 0 } else { row.stars + 1 };

@@ -33,7 +33,9 @@ async fn start(state: web::Data<Arc<AppState>>, user: AuthenticatedUser, body: w
     let formation = rows[0].formation.clone();
     let mut squad: Vec<SquadMember> = rows.iter().map(|row| SquadMember { character_id: row.character_id.to_string(), slot: row.slot, class: row.class.clone(), stats: FighterStats { hp: row.hp, attack: row.attack, defense: row.defense, attack_speed: row.attack_speed, crit_rate: row.crit_rate, crit_damage: row.crit_damage, accuracy: row.accuracy, dodge: row.dodge, penetration: row.penetration } }).collect();
     apply_formation_and_synergy(&mut squad, &formation);
-    let seed = rand::thread_rng().gen::<u64>();
+    // Seed restrita ao intervalo positivo de i64 para que o valor persistido em
+    // combat_sessions.seed/combat_runs.seed (bigint) faça round-trip sem virar negativo.
+    let seed: u64 = rand::thread_rng().gen_range(0..=i64::MAX as u64);
     let result = resolve_stage(&squad, body.stage, difficulty_multiplier(&body.difficulty), seed);
     let combat_id = Uuid::new_v4();
     let stars = stars_for(&result, &squad);

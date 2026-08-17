@@ -88,6 +88,9 @@ async fn list_characters(state: web::Data<Arc<AppState>>, user: AuthenticatedUse
 }
 
 async fn create_character(state: web::Data<Arc<AppState>>, user: AuthenticatedUser, body: web::Json<CreateCharacter>) -> AppResult<HttpResponse> {
+    // Normaliza antes de validar para que espaços não contornem length(min=3).
+    let mut body = body.into_inner();
+    body.name = body.name.trim().to_string();
     body.validate().map_err(|e| AppError::Validation(e.to_string()))?;
     if !body.class.valid_subclass(&body.subclass) { return Err(AppError::Validation("subclasse incompatível com a classe".into())); }
     let mut tx = state.db.begin().await?;
@@ -99,7 +102,7 @@ async fn create_character(state: web::Data<Arc<AppState>>, user: AuthenticatedUs
     let id = Uuid::new_v4();
     let class = body.class.as_str();
     sqlx::query("INSERT INTO characters (id,user_id,name,gender,class,subclass) VALUES ($1,$2,$3,$4::text::character_gender,$5::text::character_class,$6)")
-        .bind(id).bind(user.user_id).bind(body.name.trim()).bind(body.gender.as_str()).bind(class).bind(&body.subclass)
+        .bind(id).bind(user.user_id).bind(&body.name).bind(body.gender.as_str()).bind(class).bind(&body.subclass)
         .execute(&mut *tx).await?;
     let (hp, attack, defense) = base_for_class(class, 1);
     sqlx::query("INSERT INTO character_base_stats (character_id,hp,attack,defense) VALUES ($1,$2,$3,$4)")
