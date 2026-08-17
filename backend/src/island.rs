@@ -40,6 +40,11 @@ async fn status(state: web::Data<Arc<AppState>>, user: AuthenticatedUser) -> App
     let (unlocked_supreme, island_max_supreme) = prog_supreme.unwrap_or((false,950));
     let prog_dream: Option<(bool,i16)> = sqlx::query_as("SELECT unlocked, max_stage FROM island_progress WHERE user_id=$1 AND island_code='dream'").bind(user.user_id).fetch_optional(&state.db).await?;
     let (unlocked_dream, island_max_dream) = prog_dream.unwrap_or((false,1000));
+
+    let prog_nightmare: Option<(bool,i16)> = sqlx::query_as("SELECT unlocked, max_stage FROM island_progress WHERE user_id=$1 AND island_code='nightmare'").bind(user.user_id).fetch_optional(&state.db).await?;
+    let (unlocked_nightmare, island_max_nightmare) = prog_nightmare.unwrap_or((false,1050));
+    let prog_deep: Option<(bool,i16)> = sqlx::query_as("SELECT unlocked, max_stage FROM island_progress WHERE user_id=$1 AND island_code='deep_nightmare'").bind(user.user_id).fetch_optional(&state.db).await?;
+    let (unlocked_deep, island_max_deep) = prog_deep.unwrap_or((false,1100));
     let prog_final: Option<(bool,i16)> = sqlx::query_as("SELECT unlocked, max_stage FROM island_progress WHERE user_id=$1 AND island_code='final_abyss'").bind(user.user_id).fetch_optional(&state.db).await?;
     let (unlocked_final, island_max_final) = prog_final.unwrap_or((false,900));
     Ok(HttpResponse::Ok().json(serde_json::json!([
@@ -54,7 +59,8 @@ async fn status(state: web::Data<Arc<AppState>>, user: AuthenticatedUser) -> App
         {"island":"final_abyss","name":"Abismo Final","range":"901-950","theme":"Abismo final com vazio","requirement":"Fase 900 + 35000 Gold + VIP 15 + Despertar 5 + Power 75000","max_stage":max_stage,"vip":vip,"awak":awak,"can_unlock":unlocked_origin && max_stage>=900 && gold>=35000 && vip>=15 && awak>=5,"unlocked":unlocked_final,"island_max":island_max_final,"mobs":["final_horror","final_wraith","final_spawn"],"boss":"Abismo Final 950","loot":"Lâmina do Abismo Final, Armadura Final, Coroa Final"},
         {"island":"supreme_void","name":"Vazio Supremo","range":"951-1000","theme":"Vazio supremo com trono","requirement":"Fase 950 + 40000 Gold + VIP 15 + Despertar 5 + Power 100000","max_stage":max_stage,"vip":vip,"awak":awak,"can_unlock":unlocked_final && max_stage>=950 && gold>=40000 && vip>=15 && awak>=5,"unlocked":false,"island_max":950,"mobs":["supreme_horror","supreme_wraith","supreme_spawn"],"boss":"Vazio Supremo 1000","loot":"Lâmina Suprema, Armadura Suprema, Coroa Suprema"},
         {"island":"dream","name":"Sonho Lúcido","range":"1001-1050","theme":"Sonho lúcido com bolhas","requirement":"Fase 1000 + 45000 Gold + VIP 15 + Despertar 5 + Power 120000","max_stage":max_stage,"vip":vip,"awak":awak,"can_unlock":unlocked_supreme && max_stage>=1000 && gold>=45000 && vip>=15 && awak>=5,"unlocked":false,"island_max":1000,"mobs":["dream_horror","dream_wraith","dream_spawn"],"boss":"Sonho Lúcido 1050","loot":"Lâmina Onírica, Armadura Onírica, Coroa do Sonho"},
-        {"island":"nightmare","name":"Pesadelo Lúcido","range":"1051-1100","theme":"Pesadelo lúcido com sombras","requirement":"Fase 1050 + 50000 Gold + VIP 15 + Despertar 5 + Power 150000","max_stage":max_stage,"vip":vip,"awak":awak,"can_unlock":false,"island_max":1050,"mobs":["nightmare_horror","nightmare_wraith","nightmare_spawn"],"boss":"Pesadelo Lúcido 1100","loot":"Lâmina do Pesadelo, Armadura do Pesadelo, Coroa do Pesadelo"}
+        {"island":"nightmare","name":"Pesadelo Lúcido","range":"1051-1100","theme":"Pesadelo lúcido com sombras","requirement":"Fase 1050 + 50000 Gold + VIP 15 + Despertar 5 + Power 150000","max_stage":max_stage,"vip":vip,"awak":awak,"can_unlock":false,"island_max":1050,"mobs":["nightmare_horror","nightmare_wraith","nightmare_spawn"],"boss":"Pesadelo Lúcido 1100","loot":"Lâmina do Pesadelo, Armadura do Pesadelo, Coroa do Pesadelo"},
+        {"island":"deep_nightmare","name":"Pesadelo Profundo","range":"1101-1150","theme":"Pesadelo profundo com torres","requirement":"Fase 1100 + 55000 Gold + VIP 15 + Despertar 5 + Power 180000","max_stage":max_stage,"vip":vip,"awak":awak,"can_unlock":false,"island_max":1100,"mobs":["deep_nightmare_horror","deep_nightmare_wraith","deep_nightmare_spawn"],"boss":"Pesadelo Profundo 1150","loot":"Lâmina do Pesadelo Profundo, Armadura do Pesadelo Profundo, Coroa do Pesadelo Profundo"}
     ])))
 }
 
