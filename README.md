@@ -18,7 +18,7 @@ Este repositório contém a fundação da **Fase 1 (MVP Core)**. O primeiro incr
 - enhancement +0 a +20 com custos e chances definidos no servidor;
 - fragmentos de equipamento concedidos em vitórias e consumidos atomicamente;
 - testes unitários de combate, drops, stats, slots e enhancement;
-- Docker Compose completo e CI com fmt, Clippy e testes.
+- Docker Compose completo e script local de qualidade com fmt, Clippy e testes.
 
 Consulte [`docs/architecture.md`](docs/architecture.md) para decisões e próximos incrementos.
 
@@ -104,10 +104,10 @@ Guerreiro desbloqueia no level 5 e Arqueiro no level 15. Os slots respeitam os n
 ## Testes
 
 ```bash
-cargo fmt --all -- --check
-cargo clippy --workspace --all-targets -- -D warnings
-cargo test --workspace
+./scripts/check.sh
 ```
+
+O script executa `cargo fmt`, Clippy com warnings tratados como erro e todos os testes. O workflow do GitHub Actions será incluído quando o GitHub App tiver permissão para alterar workflows.
 
 ## Estrutura
 
