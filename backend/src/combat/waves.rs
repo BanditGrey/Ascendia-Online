@@ -82,14 +82,65 @@ pub fn resolve_stage(squad: &[SquadMember], stage: u16, difficulty: f64, seed: u
     WaveResult { victory, duration_ms, damage_dealt: total_dealt, damage_taken: total_taken, events }
 }
 
+// Capítulos 1-10 — escala e mobs fiéis ao design GDD
+fn chapter_for_stage(stage: i64) -> u8 {
+    match stage {
+        1..=50 => 1, 51..=100 => 2, 101..=150 => 3, 151..=200 => 4, 201..=250 => 5,
+        251..=300 => 6, 301..=350 => 7, 351..=400 => 8, 401..=450 => 9, _ => 10,
+    }
+}
+fn chapter_name(chapter: u8) -> &'static str {
+    match chapter {
+        1=>"Floresta",2=>"Deserto",3=>"Gelo",4=>"Vulcão",5=>"Pântano",
+        6=>"Ruínas",7=>"Abismo",8=>"Celestial",9=>"Caos",10=>"Primordial",_=>"Desconhecido",
+    }
+}
+fn boss_for_chapter(chapter: u8) -> &'static str {
+    match chapter {
+        1=>"troll_ancestral",2=>"farao_imortal",3=>"rei_inverno",4=>"senhor_inferno",
+        5=>"rainha_hidra",6=>"guardiao_ancestral",7=>"senhor_sombras",8=>"arcanjo_corrompido",
+        9=>"avatar_caos",10=>"o_criador",_=>"boss",
+    }
+}
+fn trash_for_chapter(chapter: u8, wave: u8) -> (&'static str, u8, i64, i64, i64) {
+    match (chapter, wave) {
+        (1,1)=>("slime",3,90,12,4), (1,2)=>("goblin",2,170,22,12),
+        (2,1)=>("scorpion",3,210,28,10), (2,2)=>("mummy",2,380,45,22),
+        (3,1)=>("yeti",2,420,55,30), (3,2)=>("ice_elemental",2,520,65,35),
+        (4,1)=>("imp",3,580,75,38), (4,2)=>("fire_elemental",2,720,88,42),
+        (5,1)=>("hydra_spawn",2,800,95,45), (5,2)=>("cobra_giant",2,950,110,50),
+        (6,1)=>("golem",2,1100,125,60), (6,2)=>("specter",2,1250,140,65),
+        (7,1)=>("shadow",3,1350,155,70), (7,2)=>("lich",1,1800,200,80),
+        (8,1)=>("fallen_angel",2,1500,170,75), (8,2)=>("valkyrie",2,1650,185,85),
+        (9,1)=>("aberration",2,1800,200,90), (9,2)=>("void_walker",2,2000,220,95),
+        (10,1)=>("titan",1,2800,300,110), (10,2)=>("primordial_dragon",1,3500,380,130),
+        (_,1)=>("slime",3,90,12,4), (_,_)=>("goblin",2,170,22,12),
+    }
+}
 fn enemy_wave(stage: u16, wave: u8, difficulty: f64) -> (&'static str, u8, i64, i64, i64) {
-    let stage = i64::from(stage.clamp(1, 50));
-    let factor = (1.0 + stage as f64 * 0.16) * difficulty;
+    let stage = i64::from(stage.clamp(1, 500));
+    let chapter = chapter_for_stage(stage);
+    // Curva de scaling por capítulo — suaviza para 500 fases (factor ~ 1 + stage*0.045 escalonado por cap)
+    let base_factor = 1.0 + stage as f64 * 0.045 + chapter as f64 * 0.35;
+    let factor = base_factor * difficulty;
     let (name, count, hp, attack, defense) = match wave {
-        1 => ("slime", 3, 90_i64, 12_i64, 4_i64),
-        2 => ("goblin", 2, 170_i64, 22_i64, 12_i64),
-        _ if stage % 10 == 0 => ("troll", 1, 1_100_i64, 78_i64, 65_i64),
-        _ => ("wolf", 2, 260_i64, 35_i64, 24_i64),
+        1|2 => trash_for_chapter(chapter, wave),
+        _ if stage % 50 == 0 => {
+            // Boss de capítulo a cada 50
+            let boss = boss_for_chapter(chapter);
+            let hp = 1200 + chapter as i64 * 900 + stage * 12;
+            let atk = 85 + chapter as i64 * 35 + stage/3;
+            let def = 65 + chapter as i64 * 18 + stage/6;
+            (boss, 1, hp, atk, def)
+        },
+        _ if stage % 10 == 0 => {
+            // Mini-boss a cada 10
+            let hp = 1100 + stage * 8 + chapter as i64 * 120;
+            let atk = 78 + stage/4 + chapter as i64 * 12;
+            let def = 65 + stage/8 + chapter as i64 * 8;
+            ("troll", 1, hp, atk, def)
+        },
+        _ => trash_for_chapter(chapter, 2),
     };
     (name, count, (hp as f64 * factor).round() as i64, (attack as f64 * factor.sqrt()).round() as i64, (defense as f64 * factor.sqrt()).round() as i64)
 }

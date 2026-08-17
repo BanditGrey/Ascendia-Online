@@ -4,21 +4,20 @@
 
 Este repositório contém a fundação da **Fase 1 (MVP Core)**. O primeiro incremento implementa o schema PostgreSQL, autenticação RS256 e uma engine de combate/drop determinística em Rust. O cliente nunca informa stats, rewards, seed ou resultado do combate.
 
-## Estado atual
+## Estado atual — Fase 1 MVP Core completo (2026-08-17)
 
-- API Rust com Actix Web 4 e organização por domínio;
-- PostgreSQL 16 com migration transacional para usuários, personagens, squad, inventário, cosméticos, progressão e auditoria;
-- Redis 7 conectado e verificado no health check;
-- registro com Comandante M/F, squad inicial e stats base;
-- senha com Argon2id, access JWT RS256 de curta duração e refresh token rotativo;
-- combate autoritativo das fases 1–50 em três waves de squad, com seed, snapshot e eventos auditáveis;
-- algoritmo determinístico de raridade, com Luck e dificuldade limitados no servidor;
-- inventário autoritativo com listagem, equipar, desequipar e ownership validation;
-- recálculo de stats e Power Rating a partir de uma base imutável;
-- enhancement +0 a +20 com custos e chances definidos no servidor;
-- fragmentos de equipamento concedidos em vitórias e consumidos atomicamente;
-- testes unitários de combate, drops, stats, slots e enhancement;
-- Docker Compose completo e script local de qualidade com fmt, Clippy e testes.
+- API Rust Actix 4 modular monolith, PostgreSQL 16 (7 migrations) e Redis 7 no health check;
+- registro Comandante M/F, Guerreiro Lv5 e Arqueiro Lv15 com subclasses validadas, squad 6 slots (1/5/15/35/55/80), formações balanced/vanguard/assault + sinergias 2×;
+- senha Argon2id, JWT RS256 (15min) + refresh rotativo SHA-256 (30d) + revogação Redis imediata;
+- combate autoritativo 1–50: 3 waves Slime/Goblin/Wolf (Troll boss ×10), seed ChaCha8 auditável, snapshot, stars 1-3, Dificuldades N/H/I/C;
+- drops por raridade (Luck+diff), enhancement +0-20 (custos/chances server-side), trade lock 24h;
+- inventário paginado, equip/unequip atomico, 2×anel, fragmentos `item_fragment_t1` + **fragmentos Asa/Montaria (5/3) + essências boss** por vitória;
+- stats base imutáveis → `calculate()` com itens×enhancement + **cosméticos globais do Líder**, Power Rating ponderado + ZSET reconstruível;
+- cosméticos: Asas T1-3 + Montaria T1-2 com custos ★ 10-100 (550/tier) + essências 1/3 + gate fase 50/100, partículas/aura por ★;
+- chat global/whisper (Redis quente + PG, rate 3s, block/report), ranking power paginado, offline 50% idempotente 12h/24h VIP;
+- **Godot 4 WebGL** gl_compatibility: Login, Register M/F, Hub com Squad/Combat 3D preview, Inventário, Cosméticos, Chat, Ranking, Stats, Offline, formações;
+- **3D cartoon** via primitivas: personagens M/F, asas/montaria como nós filhos, slime/goblin/wolf/troll, partículas por ★, damage numbers, HUD HP bars, WebSocket replay;
+- testes unitários (combate, drops, stats, slots, enhancement), Docker Compose + `scripts/check.sh` (fmt/clippy/test).
 
 Consulte [`docs/architecture.md`](docs/architecture.md) para decisões e próximos incrementos.
 

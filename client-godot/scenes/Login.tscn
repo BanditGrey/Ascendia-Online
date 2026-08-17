@@ -1,48 +1,116 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=2 format=3 uid="uid://b_login_ascendia"]
 
-[ext_resource path="res://scripts/login.gd" type="Script" id="1"]
+[ext_resource type="Script" path="res://scripts/login.gd" id="1_7x8ab"]
 
 [node name="Login" type="Control"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("1")
+layout_mode=3
+anchors_preset=15
+anchor_right=1.0
+anchor_bottom=1.0
+grow_horizontal=2
+grow_vertical=2
+script=ExtResource("1_7x8ab")
 
-[node name="Center" type="VBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -180.0
-offset_top = -130.0
-offset_right = 180.0
-offset_bottom = 130.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="Background" type="ColorRect" parent="."]
+layout_mode=1
+anchors_preset=15
+anchor_right=1.0
+anchor_bottom=1.0
+grow_horizontal=2
+grow_vertical=2
+color=Color(0.06, 0.06, 0.09, 1)
 
-[node name="Title" type="Label" parent="Center"]
-layout_mode = 2
-text = "ASCENDIA ONLINE"
-horizontal_alignment = 1
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode=1
+anchors_preset=15
+anchor_right=1.0
+anchor_bottom=1.0
+grow_horizontal=2
+grow_vertical=2
 
-[node name="Email" type="LineEdit" parent="Center"]
-layout_mode = 2
-placeholder_text = "E-mail"
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size=Vector2(440, 520)
+size_flags_horizontal=0
+size_flags_vertical=0
 
-[node name="Password" type="LineEdit" parent="Center"]
-layout_mode = 2
-placeholder_text = "Senha"
-secret = true
+[node name="VBox" type="VBoxContainer" parent="Center/Panel"]
+layout_mode=2
+alignment=1
+offset_left=24.0
+offset_top=24.0
+offset_right=-24.0
+offset_bottom=-24.0
 
-[node name="Submit" type="Button" parent="Center"]
-layout_mode = 2
-text = "Entrar"
+[node name="Logo" type="Label" parent="Center/Panel/VBox"]
+layout_mode=2
+theme_override_font_sizes/font_size=28
+text="ASCENDIA ONLINE"
+horizontal_alignment=1
 
-[node name="Status" type="Label" parent="Center"]
-layout_mode = 2
-horizontal_alignment = 1
+[node name="Subtitle" type="Label" parent="Center/Panel/VBox"]
+layout_mode=2
+theme_override_font_sizes/font_size=12
+theme_override_colors/font_color=Color(0.7, 0.7, 0.75, 1)
+text="Rise. Evolve. Dominate. — 3D Idle Squad Battle RPG"
+horizontal_alignment=1
+
+[node name="Spacer1" type="Control" parent="Center/Panel/VBox"]
+custom_minimum_size=Vector2(0, 18)
+layout_mode=2
+
+[node name="Email" type="LineEdit" parent="Center/Panel/VBox"]
+custom_minimum_size=Vector2(0, 44)
+layout_mode=2
+placeholder_text="E-mail"
+alignment=0
+
+[node name="Password" type="LineEdit" parent="Center/Panel/VBox"]
+custom_minimum_size=Vector2(0, 44)
+layout_mode=2
+placeholder_text="Senha (mín. 10 caracteres)"
+secret=true
+
+[node name="Submit" type="Button" parent="Center/Panel/VBox"]
+custom_minimum_size=Vector2(0, 46)
+layout_mode=2
+text="ENTRAR — Servidor Autoritativo"
+
+[node name="OAuthRow" type="HBoxContainer" parent="Center/Panel/VBox"]
+layout_mode=2
+alignment=1
+
+[node name="GoogleBtn" type="Button" parent="Center/Panel/VBox/OAuthRow"]
+custom_minimum_size=Vector2(140, 36)
+layout_mode=2
+text="🔵 Google OAuth"
+
+[node name="DiscordBtn" type="Button" parent="Center/Panel/VBox/OAuthRow"]
+custom_minimum_size=Vector2(140, 36)
+layout_mode=2
+text="🟣 Discord OAuth"
+
+[node name="RegisterLink" type="Button" parent="Center/Panel/VBox"]
+layout_mode=2
+flat=true
+text="Não tem conta? Criar Comandante"
+
+[node name="Status" type="Label" parent="Center/Panel/VBox"]
+layout_mode=2
+horizontal_alignment=1
+autowrap_mode=3
+theme_override_colors/font_color=Color(0.9, 0.9, 0.9, 1)
+
+[node name="Health" type="Label" parent="Center/Panel/VBox"]
+layout_mode=2
+horizontal_alignment=1
+theme_override_font_sizes/font_size=11
+theme_override_colors/font_color=Color(0.6, 0.6, 0.65, 1)
+text="Verificando..."
+
+[node name="Footer" type="Label" parent="Center/Panel/VBox"]
+layout_mode=2
+theme_override_font_sizes/font_size=10
+theme_override_colors/font_color=Color(0.5, 0.5, 0.55, 1)
+text="Godot apenas renderiza. Combate, drops e stats são calculados em Rust."
+horizontal_alignment=1
+autowrap_mode=3

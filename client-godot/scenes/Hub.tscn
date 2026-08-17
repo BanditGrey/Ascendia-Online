@@ -1,48 +1,908 @@
-[gd_scene load_steps=2 format=3]
-
-[ext_resource path="res://scripts/hub.gd" type="Script" id="1"]
+[gd_scene load_steps=5 format=3 uid="uid://b_hub_ascendia"]
+[ext_resource type="Script" path="res://scripts/hub.gd" id="1_hub"]
+[ext_resource type="Script" path="res://scripts/combat_3d.gd" id="2_c3d"]
+[ext_resource type="Script" path="res://scripts/hud.gd" id="3_hud"]
 
 [node name="Hub" type="Control"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("1")
+layout_mode=3
+anchors_preset=15
+anchor_right=1.0
+anchor_bottom=1.0
+grow_horizontal=2
+grow_vertical=2
+script=ExtResource("1_hub")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode=1
+anchors_preset=15
+anchor_right=1.0
+anchor_bottom=1.0
+grow_horizontal=2
+grow_vertical=2
+color=Color(0.065, 0.065, 0.09, 1)
 
 [node name="Layout" type="VBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 48.0
-offset_top = 48.0
-offset_right = -48.0
-offset_bottom = -48.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode=1
+anchors_preset=15
+anchor_right=1.0
+anchor_bottom=1.0
+offset_left=12.0
+offset_top=12.0
+offset_right=-12.0
+offset_bottom=-12.0
+grow_horizontal=2
+grow_vertical=2
 
-[node name="Title" type="Label" parent="Layout"]
-layout_mode = 2
-text = "Hub — Ascendia Online"
+[node name="Header" type="HBoxContainer" parent="Layout"]
+layout_mode=2
+alignment=1
 
-[node name="Squad" type="RichTextLabel" parent="Layout"]
-custom_minimum_size = Vector2(0, 180)
-layout_mode = 2
-bbcode_enabled = true
+[node name="Title" type="Label" parent="Layout/Header"]
+custom_minimum_size=Vector2(260, 0)
+layout_mode=2
+theme_override_font_sizes/font_size=18
+text="ASCENDIA ONLINE — Hub"
 
-[node name="Stage" type="SpinBox" parent="Layout"]
-layout_mode = 2
-min_value = 1.0
-max_value = 50.0
-value = 1.0
+[node name="Spacer" type="Control" parent="Layout/Header"]
+custom_minimum_size=Vector2(20, 0)
+layout_mode=2
+size_flags_horizontal=3
 
-[node name="StartCombat" type="Button" parent="Layout"]
-layout_mode = 2
-text = "Iniciar combate"
+[node name="InventoryBtn" type="Button" parent="Layout/Header"]
+layout_mode=2
+text="🎒 Inventário"
 
-[node name="Combat" type="RichTextLabel" parent="Layout"]
-custom_minimum_size = Vector2(0, 180)
-layout_mode = 2
-bbcode_enabled = true
+[node name="CosmeticsBtn" type="Button" parent="Layout/Header"]
+layout_mode=2
+text="🪶 Cosméticos"
+
+[node name="ChatBtn" type="Button" parent="Layout/Header"]
+layout_mode=2
+text="💬 Chat"
+
+[node name="RankingBtn" type="Button" parent="Layout/Header"]
+layout_mode=2
+text="🏆 Ranking"
+
+[node name="VipBtn" type="Button" parent="Layout/Header"]
+layout_mode=2
+text="👑 VIP"
+
+[node name="PassBtn" type="Button" parent="Layout/Header"]
+layout_mode=2
+text="🎫 Pass"
+
+[node name="GuildBtn" type="Button" parent="Layout/Header"]
+layout_mode=2
+text="🏰 Guilda"
+
+[node name="MarketBtn" type="Button" parent="Layout/Header"]
+layout_mode=2
+text="📦 Market"
+
+[node name="Logout" type="Button" parent="Layout/Header"]
+layout_mode=2
+flat=false
+text="Sair"
+
+[node name="Main" type="VBoxContainer" parent="Layout"]
+layout_mode=2
+size_flags_vertical=3
+
+[node name="TopBar" type="HBoxContainer" parent="Layout/Main"]
+layout_mode=2
+
+[node name="Gold" type="Label" parent="Layout/Main/TopBar"]
+custom_minimum_size=Vector2(220, 0)
+layout_mode=2
+text="Lv.1 • Power 0"
+
+[node name="Spacer2" type="Control" parent="Layout/Main/TopBar"]
+layout_mode=2
+size_flags_horizontal=3
+
+[node name="OfflineBtn" type="Button" parent="Layout/Main/TopBar"]
+layout_mode=2
+text="⚡ Coletar Offline (idempotente)"
+
+[node name="Content" type="HBoxContainer" parent="Layout/Main"]
+layout_mode=2
+size_flags_vertical=3
+
+[node name="SquadPanel" type="PanelContainer" parent="Layout/Main/Content"]
+custom_minimum_size=Vector2(360, 0)
+layout_mode=2
+size_flags_horizontal=3
+
+[node name="VBox" type="VBoxContainer" parent="Layout/Main/Content/SquadPanel"]
+layout_mode=2
+offset_left=8.0
+offset_top=8.0
+offset_right=-8.0
+offset_bottom=-8.0
+
+[node name="SquadTitle" type="Label" parent="Layout/Main/Content/SquadPanel/VBox"]
+layout_mode=2
+text="SQUAD — 6 slots (Líder fixo slot 1)"
+
+[node name="SquadText" type="RichTextLabel" parent="Layout/Main/Content/SquadPanel/VBox"]
+custom_minimum_size=Vector2(0, 220)
+layout_mode=2
+bbcode_enabled=true
+scroll_active=true
+text="[i]carregando...[/i]"
+
+[node name="FormationRow" type="HBoxContainer" parent="Layout/Main/Content/SquadPanel/VBox"]
+layout_mode=2
+
+[node name="FormationLabel" type="Label" parent="Layout/Main/Content/SquadPanel/VBox/FormationRow"]
+layout_mode=2
+text="Formação:"
+
+[node name="Formation" type="OptionButton" parent="Layout/Main/Content/SquadPanel/VBox/FormationRow"]
+custom_minimum_size=Vector2(160, 0)
+layout_mode=2
+size_flags_horizontal=3
+
+[node name="SquadHint" type="Label" parent="Layout/Main/Content/SquadPanel/VBox"]
+layout_mode=2
+autowrap_mode=3
+theme_override_font_sizes/font_size=11
+theme_override_colors/font_color=Color(0.6, 0.6, 0.65, 1)
+text="Slots: 1(1),2(5),3(15),4(35),5(55),6(80). Formações e sinergias calculadas no servidor."
+
+[node name="RecruitRow" type="HBoxContainer" parent="Layout/Main/Content/SquadPanel/VBox"]
+layout_mode=2
+
+[node name="RecruitWarrior" type="Button" parent="Layout/Main/Content/SquadPanel/VBox/RecruitRow"]
+layout_mode=2
+size_flags_horizontal=3
+text="🛡️ Recrutar Guerreiro (Lv5)"
+
+[node name="RecruitArcher" type="Button" parent="Layout/Main/Content/SquadPanel/VBox/RecruitRow"]
+layout_mode=2
+size_flags_horizontal=3
+text="🏹 Arqueiro (Lv15)"
+
+[node name="RecruitRow2" type="HBoxContainer" parent="Layout/Main/Content/SquadPanel/VBox"]
+layout_mode=2
+
+[node name="RecruitMage" type="Button" parent="Layout/Main/Content/SquadPanel/VBox/RecruitRow2"]
+layout_mode=2
+size_flags_horizontal=3
+text="🔮 Mago (Lv25)"
+
+[node name="RecruitAssassin" type="Button" parent="Layout/Main/Content/SquadPanel/VBox/RecruitRow2"]
+layout_mode=2
+size_flags_horizontal=3
+text="⚔️ Assassino (Lv38)"
+
+[node name="RecruitSupport" type="Button" parent="Layout/Main/Content/SquadPanel/VBox/RecruitRow2"]
+layout_mode=2
+size_flags_horizontal=3
+text="💚 Suporte (Lv55)"
+
+[node name="CombatPanel" type="PanelContainer" parent="Layout/Main/Content"]
+custom_minimum_size=Vector2(520, 0)
+layout_mode=2
+size_flags_horizontal=3
+
+[node name="VBox" type="VBoxContainer" parent="Layout/Main/Content/CombatPanel"]
+layout_mode=2
+offset_left=10.0
+offset_top=10.0
+offset_right=-10.0
+offset_bottom=-10.0
+
+[node name="CombatTitle" type="Label" parent="Layout/Main/Content/CombatPanel/VBox"]
+layout_mode=2
+text="COMBATE IDLE — Autoritativo (Rust)"
+
+[node name="StageRow" type="HBoxContainer" parent="Layout/Main/Content/CombatPanel/VBox"]
+layout_mode=2
+
+[node name="StageLabel" type="Label" parent="Layout/Main/Content/CombatPanel/VBox/StageRow"]
+layout_mode=2
+text="Fase 1–50 (Cap.1 Floresta):"
+
+[node name="Stage" type="SpinBox" parent="Layout/Main/Content/CombatPanel/VBox/StageRow"]
+custom_minimum_size=Vector2(90, 0)
+layout_mode=2
+min_value=1.0
+max_value=500.0
+step=1.0
+value=1.0
+allow_greater=false
+allow_lesser=false
+
+[node name="ChapterLabel" type="Label" parent="Layout/Main/Content/CombatPanel/VBox/StageRow"]
+layout_mode=2
+text="— Cap.1 Floresta 1-50"
+
+[node name="DifficultyLabel" type="Label" parent="Layout/Main/Content/CombatPanel/VBox/StageRow"]
+layout_mode=2
+text="Dificuldade:"
+
+[node name="Difficulty" type="OptionButton" parent="Layout/Main/Content/CombatPanel/VBox/StageRow"]
+custom_minimum_size=Vector2(120, 0)
+layout_mode=2
+
+[node name="StartCombat" type="Button" parent="Layout/Main/Content/CombatPanel/VBox"]
+custom_minimum_size=Vector2(0, 44)
+layout_mode=2
+text="⚔️ INICIAR COMBATE (3 waves + Boss a cada 10)"
+
+[node name="Progress" type="ProgressBar" parent="Layout/Main/Content/CombatPanel/VBox"]
+custom_minimum_size=Vector2(0, 10)
+layout_mode=2
+max_value=100.0
+step=1.0
+value=0.0
+show_percentage=false
+
+[node name="CombatResult" type="RichTextLabel" parent="Layout/Main/Content/CombatPanel/VBox"]
+custom_minimum_size=Vector2(0, 200)
+layout_mode=2
+bbcode_enabled=true
+scroll_active=true
+text="[color=#888]Pronto para iniciar. O servidor resolve Slime/Goblin/Lobo e Troll em múltiplos de 10.[/color]"
+
+[node name="CombatPreview" type="SubViewportContainer" parent="Layout/Main/Content/CombatPanel/VBox"]
+custom_minimum_size=Vector2(0, 220)
+layout_mode=2
+stretch=true
+
+[node name="SubViewport" type="SubViewport" parent="Layout/Main/Content/CombatPanel/VBox/CombatPreview"]
+size=Vector2(640, 360)
+handle_input_locally=false
+render_target_update_mode=4
+own_world_3d=true
+
+[node name="Combat3D" type="Node3D" parent="Layout/Main/Content/CombatPanel/VBox/CombatPreview/SubViewport"]
+script=ExtResource("2_c3d")
+
+[node name="Camera3D" type="Camera3D" parent="Layout/Main/Content/CombatPanel/VBox/CombatPreview/SubViewport/Combat3D"]
+transform=Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 6, 10)
+fov=58.0
+
+[node name="Light" type="DirectionalLight3D" parent="Layout/Main/Content/CombatPanel/VBox/CombatPreview/SubViewport/Combat3D"]
+transform=Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 4, 8, 4)
+light_energy=1.2
+shadow_enabled=true
+
+[node name="WorldEnv" type="WorldEnvironment" parent="Layout/Main/Content/CombatPanel/VBox/CombatPreview/SubViewport/Combat3D"]
+environment=SubResource("Environment_1")
+
+[node name="HUD" type="Control" parent="Layout/Main/Content/CombatPanel/VBox/CombatPreview"]
+layout_mode=1
+anchors_preset=15
+anchor_right=1.0
+anchor_bottom=1.0
+grow_horizontal=2
+grow_vertical=2
+mouse_filter=2
+script=ExtResource("3_hud")
+
+[node name="TabContainer" type="TabContainer" parent="Layout/Main"]
+custom_minimum_size=Vector2(0, 340)
+layout_mode=2
+tab_alignment=0
+current_tab=0
+
+[node name="Personagem" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=true
+metadata/_tab_index=0
+
+[node name="StatsText" type="RichTextLabel" parent="Layout/Main/TabContainer/Personagem"]
+custom_minimum_size=Vector2(0, 280)
+layout_mode=2
+bbcode_enabled=true
+text="Stats..."
+
+[node name="Inventario" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=1
+
+[node name="InventoryText" type="RichTextLabel" parent="Layout/Main/TabContainer/Inventario"]
+custom_minimum_size=Vector2(0, 240)
+layout_mode=2
+bbcode_enabled=true
+text="Inventário..."
+
+[node name="InvActions" type="HBoxContainer" parent="Layout/Main/TabContainer/Inventario"]
+layout_mode=2
+
+[node name="EquipBtn" type="Button" parent="Layout/Main/TabContainer/Inventario/InvActions"]
+layout_mode=2
+text="Equipar no Líder"
+
+[node name="UnequipBtn" type="Button" parent="Layout/Main/TabContainer/Inventario/InvActions"]
+layout_mode=2
+text="Desequipar"
+
+[node name="EnhanceBtn" type="Button" parent="Layout/Main/TabContainer/Inventario/InvActions"]
+layout_mode=2
+text="Enhance + (custo fragmentos)"
+
+[node name="Cosmeticos" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=2
+
+[node name="CosmeticsText" type="RichTextLabel" parent="Layout/Main/TabContainer/Cosmeticos"]
+custom_minimum_size=Vector2(0, 260)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="CosmeticsActions" type="HBoxContainer" parent="Layout/Main/TabContainer/Cosmeticos"]
+layout_mode=2
+
+[node name="UpgradeWings" type="Button" parent="Layout/Main/TabContainer/Cosmeticos/CosmeticsActions"]
+layout_mode=2
+text="🪶 Asas"
+
+[node name="UpgradeMount" type="Button" parent="Layout/Main/TabContainer/Cosmeticos/CosmeticsActions"]
+layout_mode=2
+text="🐴 Mount"
+
+[node name="UpgradePet" type="Button" parent="Layout/Main/TabContainer/Cosmeticos/CosmeticsActions"]
+layout_mode=2
+text="🐾 Pet"
+
+[node name="UpgradeAura" type="Button" parent="Layout/Main/TabContainer/Cosmeticos/CosmeticsActions"]
+layout_mode=2
+text="💫 Aura"
+
+[node name="CosmeticsActions2" type="HBoxContainer" parent="Layout/Main/TabContainer/Cosmeticos"]
+layout_mode=2
+
+[node name="UpgradeMask" type="Button" parent="Layout/Main/TabContainer/Cosmeticos/CosmeticsActions2"]
+layout_mode=2
+text="🎭 Máscara"
+
+[node name="UpgradeTrail" type="Button" parent="Layout/Main/TabContainer/Cosmeticos/CosmeticsActions2"]
+layout_mode=2
+text="✨ Trail"
+
+[node name="UpgradeHit" type="Button" parent="Layout/Main/TabContainer/Cosmeticos/CosmeticsActions2"]
+layout_mode=2
+text="💥 Hit"
+
+[node name="UpgradeFrame" type="Button" parent="Layout/Main/TabContainer/Cosmeticos/CosmeticsActions2"]
+layout_mode=2
+text="🌀 Frame"
+
+[node name="Chat" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=3
+
+[node name="ChatHistory" type="RichTextLabel" parent="Layout/Main/TabContainer/Chat"]
+custom_minimum_size=Vector2(0, 240)
+layout_mode=2
+bbcode_enabled=true
+scroll_active=true
+
+[node name="ChatRow" type="HBoxContainer" parent="Layout/Main/TabContainer/Chat"]
+layout_mode=2
+
+[node name="ChatInput" type="LineEdit" parent="Layout/Main/TabContainer/Chat/ChatRow"]
+custom_minimum_size=Vector2(400, 0)
+layout_mode=2
+size_flags_horizontal=3
+placeholder_text="Mensagem global (rate limit 3s)..."
+max_length=280
+
+[node name="ChatSend" type="Button" parent="Layout/Main/TabContainer/Chat/ChatRow"]
+layout_mode=2
+text="Enviar"
+
+[node name="ChatHint" type="Label" parent="Layout/Main/TabContainer/Chat"]
+layout_mode=2
+theme_override_font_sizes/font_size=11
+theme_override_colors/font_color=Color(0.6, 0.6, 0.65, 1)
+text="Canais: Global, Guilda, Whisper, Trade, Arena, System, VIP. Anti-spam e block no servidor."
+
+[node name="Ranking" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=4
+
+[node name="RankingText" type="RichTextLabel" parent="Layout/Main/TabContainer/Ranking"]
+custom_minimum_size=Vector2(0, 300)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="Vip" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=5
+
+[node name="VipText" type="RichTextLabel" parent="Layout/Main/TabContainer/Vip"]
+custom_minimum_size=Vector2(0, 220)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="VipRow" type="HBoxContainer" parent="Layout/Main/TabContainer/Vip"]
+layout_mode=2
+
+[node name="VipGrant" type="Button" parent="Layout/Main/TabContainer/Vip/VipRow"]
+layout_mode=2
+text="💎 Grant +500 VIP (teste)"
+
+[node name="VipInfo" type="Label" parent="Layout/Main/TabContainer/Vip/VipRow"]
+layout_mode=2
+size_flags_horizontal=3
+text="VIP 0→15 nunca expira. 24h offline no 15."
+
+[node name="BattlePass" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=6
+
+[node name="PassText" type="RichTextLabel" parent="Layout/Main/TabContainer/BattlePass"]
+custom_minimum_size=Vector2(0, 220)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="PassRow" type="HBoxContainer" parent="Layout/Main/TabContainer/BattlePass"]
+layout_mode=2
+
+[node name="PassPremium" type="Button" parent="Layout/Main/TabContainer/BattlePass/PassRow"]
+layout_mode=2
+text="🎫 Ativar Premium (500 💎)"
+
+[node name="PassClaim" type="Button" parent="Layout/Main/TabContainer/BattlePass/PassRow"]
+layout_mode=2
+text="🎁 Claim Próximo"
+
+[node name="Guilda" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=7
+
+[node name="GuildText" type="RichTextLabel" parent="Layout/Main/TabContainer/Guilda"]
+custom_minimum_size=Vector2(0, 200)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="GuildRow" type="HBoxContainer" parent="Layout/Main/TabContainer/Guilda"]
+layout_mode=2
+
+[node name="GuildCreate" type="LineEdit" parent="Layout/Main/TabContainer/Guilda/GuildRow"]
+custom_minimum_size=Vector2(180, 0)
+layout_mode=2
+placeholder_text="Nome da guilda (3-40) — custa 1000 Gold Lv20"
+
+[node name="GuildCreateBtn" type="Button" parent="Layout/Main/TabContainer/Guilda/GuildRow"]
+layout_mode=2
+text="Criar (1000 Gold)"
+
+[node name="GuildJoinRow" type="HBoxContainer" parent="Layout/Main/TabContainer/Guilda"]
+layout_mode=2
+
+[node name="GuildList" type="Button" parent="Layout/Main/TabContainer/Guilda/GuildJoinRow"]
+layout_mode=2
+text="Listar Guildas"
+
+[node name="GuildLeave" type="Button" parent="Layout/Main/TabContainer/Guilda/GuildJoinRow"]
+layout_mode=2
+text="Sair"
+
+[node name="Marketplace" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=8
+
+[node name="MarketText" type="RichTextLabel" parent="Layout/Main/TabContainer/Marketplace"]
+custom_minimum_size=Vector2(0, 200)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="MarketRow" type="HBoxContainer" parent="Layout/Main/TabContainer/Marketplace"]
+layout_mode=2
+
+[node name="MarketList" type="Button" parent="Layout/Main/TabContainer/Marketplace/MarketRow"]
+layout_mode=2
+text="Listar (Diamantes)"
+
+[node name="MarketCreate" type="Button" parent="Layout/Main/TabContainer/Marketplace/MarketRow"]
+layout_mode=2
+text="Vender Selecionado (100 💎)"
+
+[node name="MarketBuy" type="Button" parent="Layout/Main/TabContainer/Marketplace/MarketRow"]
+layout_mode=2
+text="Comprar 1º"
+
+[node name="Skills" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=9
+
+[node name="SkillsText" type="RichTextLabel" parent="Layout/Main/TabContainer/Skills"]
+custom_minimum_size=Vector2(0, 200)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="SkillsRow" type="HBoxContainer" parent="Layout/Main/TabContainer/Skills"]
+layout_mode=2
+
+[node name="SkillsLoad" type="Button" parent="Layout/Main/TabContainer/Skills/SkillsRow"]
+layout_mode=2
+text="Carregar Árvore"
+
+[node name="SkillsAllocate" type="Button" parent="Layout/Main/TabContainer/Skills/SkillsRow"]
+layout_mode=2
+text="Alocar 1 ponto (1ª skill)"
+
+[node name="SkillsReset" type="Button" parent="Layout/Main/TabContainer/Skills/SkillsRow"]
+layout_mode=2
+text="Reset"
+
+[node name="AwakenBtn" type="Button" parent="Layout/Main/TabContainer/Skills/SkillsRow"]
+layout_mode=2
+text="Despertar Lv100 → 1 (awakening)"
+
+[node name="Torre" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=10
+
+[node name="TowerText" type="RichTextLabel" parent="Layout/Main/TabContainer/Torre"]
+custom_minimum_size=Vector2(0, 180)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="TowerRow" type="HBoxContainer" parent="Layout/Main/TabContainer/Torre"]
+layout_mode=2
+
+[node name="TowerStatus" type="Button" parent="Layout/Main/TabContainer/Torre/TowerRow"]
+layout_mode=2
+text="Status"
+
+[node name="TowerChallenge" type="Button" parent="Layout/Main/TabContainer/Torre/TowerRow"]
+layout_mode=2
+text="Desafiar Próximo Andar"
+
+[node name="TowerRanking" type="Button" parent="Layout/Main/TabContainer/Torre/TowerRow"]
+layout_mode=2
+text="Ranking Torre"
+
+[node name="Arena" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=11
+
+[node name="ArenaText" type="RichTextLabel" parent="Layout/Main/TabContainer/Arena"]
+custom_minimum_size=Vector2(0, 180)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="ArenaRow" type="HBoxContainer" parent="Layout/Main/TabContainer/Arena"]
+layout_mode=2
+
+[node name="ArenaStatus" type="Button" parent="Layout/Main/TabContainer/Arena/ArenaRow"]
+layout_mode=2
+text="Status"
+
+[node name="ArenaFight" type="Button" parent="Layout/Main/TabContainer/Arena/ArenaRow"]
+layout_mode=2
+text="Lutar (5/dia VIP20)"
+
+[node name="ArenaRanking" type="Button" parent="Layout/Main/TabContainer/Arena/ArenaRow"]
+layout_mode=2
+text="Ranking Arena"
+
+[node name="Dungeon" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=12
+
+[node name="DungeonText" type="RichTextLabel" parent="Layout/Main/TabContainer/Dungeon"]
+custom_minimum_size=Vector2(0, 180)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="DungeonRow" type="HBoxContainer" parent="Layout/Main/TabContainer/Dungeon"]
+layout_mode=2
+
+[node name="DungeonStatus" type="Button" parent="Layout/Main/TabContainer/Dungeon/DungeonRow"]
+layout_mode=2
+text="Status (3/dia VIP10)"
+
+[node name="DungeonExp" type="Button" parent="Layout/Main/TabContainer/Dungeon/DungeonRow"]
+layout_mode=2
+text="EXP Dungeon"
+
+[node name="DungeonMat" type="Button" parent="Layout/Main/TabContainer/Dungeon/DungeonRow"]
+layout_mode=2
+text="Material"
+
+[node name="DungeonEquip" type="Button" parent="Layout/Main/TabContainer/Dungeon/DungeonRow"]
+layout_mode=2
+text="Equip"
+
+[node name="Amigos" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=13
+
+[node name="FriendsText" type="RichTextLabel" parent="Layout/Main/TabContainer/Amigos"]
+custom_minimum_size=Vector2(0, 180)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="FriendsRow" type="HBoxContainer" parent="Layout/Main/TabContainer/Amigos"]
+layout_mode=2
+
+[node name="FriendsList" type="Button" parent="Layout/Main/TabContainer/Amigos/FriendsRow"]
+layout_mode=2
+text="Listar Amigos (100)"
+
+[node name="FriendsRequests" type="Button" parent="Layout/Main/TabContainer/Amigos/FriendsRow"]
+layout_mode=2
+text="Pedidos"
+
+[node name="Quests" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=14
+
+[node name="QuestsText" type="RichTextLabel" parent="Layout/Main/TabContainer/Quests"]
+custom_minimum_size=Vector2(0, 200)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="QuestsRow" type="HBoxContainer" parent="Layout/Main/TabContainer/Quests"]
+layout_mode=2
+
+[node name="DailyBtn" type="Button" parent="Layout/Main/TabContainer/Quests/QuestsRow"]
+layout_mode=2
+text="Diárias (5)"
+
+[node name="WeeklyBtn" type="Button" parent="Layout/Main/TabContainer/Quests/QuestsRow"]
+layout_mode=2
+text="Semanais (7)"
+
+[node name="AchBtn" type="Button" parent="Layout/Main/TabContainer/Quests/QuestsRow"]
+layout_mode=2
+text="Achievements"
+
+[node name="Expedition" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=15
+
+[node name="ExpeditionText" type="RichTextLabel" parent="Layout/Main/TabContainer/Expedition"]
+custom_minimum_size=Vector2(0, 180)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="ExpeditionRow" type="HBoxContainer" parent="Layout/Main/TabContainer/Expedition"]
+layout_mode=2
+
+[node name="ExpeditionList" type="Button" parent="Layout/Main/TabContainer/Expedition/ExpeditionRow"]
+layout_mode=2
+text="Listar"
+
+[node name="ExpeditionStart" type="Button" parent="Layout/Main/TabContainer/Expedition/ExpeditionRow"]
+layout_mode=2
+text="Iniciar 2h (slot livre)"
+
+[node name="ExpeditionClaim" type="Button" parent="Layout/Main/TabContainer/Expedition/ExpeditionRow"]
+layout_mode=2
+text="Claim 1ª"
+
+[node name="WorldBoss" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=16
+
+[node name="BossText" type="RichTextLabel" parent="Layout/Main/TabContainer/WorldBoss"]
+custom_minimum_size=Vector2(0, 180)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="BossRow" type="HBoxContainer" parent="Layout/Main/TabContainer/WorldBoss"]
+layout_mode=2
+
+[node name="BossStatus" type="Button" parent="Layout/Main/TabContainer/WorldBoss/BossRow"]
+layout_mode=2
+text="Status (6h)"
+
+[node name="BossAttack" type="Button" parent="Layout/Main/TabContainer/WorldBoss/BossRow"]
+layout_mode=2
+text="Atacar (Power*0.5)"
+
+[node name="BossRanking" type="Button" parent="Layout/Main/TabContainer/WorldBoss/BossRow"]
+layout_mode=2
+text="Ranking DPS Top100"
+
+[node name="Economia" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=17
+
+[node name="EconomiaText" type="RichTextLabel" parent="Layout/Main/TabContainer/Economia"]
+custom_minimum_size=Vector2(0, 220)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="EconomiaRow" type="HBoxContainer" parent="Layout/Main/TabContainer/Economia"]
+layout_mode=2
+
+[node name="RunesList" type="Button" parent="Layout/Main/TabContainer/Economia/EconomiaRow"]
+layout_mode=2
+text="Runas"
+
+[node name="SocketBtn" type="Button" parent="Layout/Main/TabContainer/Economia/EconomiaRow"]
+layout_mode=2
+text="Socket 1ª runa"
+
+[node name="RecipesBtn" type="Button" parent="Layout/Main/TabContainer/Economia/EconomiaRow"]
+layout_mode=2
+text="Receitas"
+
+[node name="FuseBtn" type="Button" parent="Layout/Main/TabContainer/Economia/EconomiaRow"]
+layout_mode=2
+text="Fusão 3×"
+
+[node name="EnchantBtn" type="Button" parent="Layout/Main/TabContainer/Economia/EconomiaRow"]
+layout_mode=2
+text="Enchant (200G)"
+
+[node name="TradeRow" type="HBoxContainer" parent="Layout/Main/TabContainer/Economia"]
+layout_mode=2
+
+[node name="CreateTrade" type="Button" parent="Layout/Main/TabContainer/Economia/TradeRow"]
+layout_mode=2
+text="Trade P2P (60s)"
+
+[node name="ListTrades" type="Button" parent="Layout/Main/TabContainer/Economia/TradeRow"]
+layout_mode=2
+text="Listar Trades"
+
+[node name="CreateAuction" type="Button" parent="Layout/Main/TabContainer/Economia/TradeRow"]
+layout_mode=2
+text="Leilão 6h Lendário"
+
+[node name="BidAuction" type="Button" parent="Layout/Main/TabContainer/Economia/TradeRow"]
+layout_mode=2
+text="Dar Lance"
+
+[node name="GuildWar" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=18
+
+[node name="WarText" type="RichTextLabel" parent="Layout/Main/TabContainer/GuildWar"]
+custom_minimum_size=Vector2(0, 200)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="WarRow" type="HBoxContainer" parent="Layout/Main/TabContainer/GuildWar"]
+layout_mode=2
+
+[node name="ChallengeWar" type="Button" parent="Layout/Main/TabContainer/GuildWar/WarRow"]
+layout_mode=2
+text="Desafiar GvG"
+
+[node name="WarStatus" type="Button" parent="Layout/Main/TabContainer/GuildWar/WarRow"]
+layout_mode=2
+text="Status Guerras"
+
+[node name="Territories" type="Button" parent="Layout/Main/TabContainer/GuildWar/WarRow"]
+layout_mode=2
+text="Territórios (buff)"
+
+[node name="Tournament" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=19
+
+[node name="TournamentText" type="RichTextLabel" parent="Layout/Main/TabContainer/Tournament"]
+custom_minimum_size=Vector2(0, 200)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="TournamentRow" type="HBoxContainer" parent="Layout/Main/TabContainer/Tournament"]
+layout_mode=2
+
+[node name="TournamentStatus" type="Button" parent="Layout/Main/TabContainer/Tournament/TournamentRow"]
+layout_mode=2
+text="Status (32)"
+
+[node name="TournamentRegister" type="Button" parent="Layout/Main/TabContainer/Tournament/TournamentRow"]
+layout_mode=2
+text="Registrar (Quarta)"
+
+[node name="TournamentBracket" type="Button" parent="Layout/Main/TabContainer/Tournament/TournamentRow"]
+layout_mode=2
+text="Bracket"
+
+[node name="Admin" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=20
+
+[node name="AdminText" type="RichTextLabel" parent="Layout/Main/TabContainer/Admin"]
+custom_minimum_size=Vector2(0, 200)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="AdminRow" type="HBoxContainer" parent="Layout/Main/TabContainer/Admin"]
+layout_mode=2
+
+[node name="AdminUsers" type="Button" parent="Layout/Main/TabContainer/Admin/AdminRow"]
+layout_mode=2
+text="Listar Usuários (GM)"
+
+[node name="AdminMetrics" type="Button" parent="Layout/Main/TabContainer/Admin/AdminRow"]
+layout_mode=2
+text="Métricas"
+
+[node name="Setup2FA" type="Button" parent="Layout/Main/TabContainer/Admin/AdminRow"]
+layout_mode=2
+text="2FA Setup (TOTP)"
+
+[node name="Verify2FA" type="Button" parent="Layout/Main/TabContainer/Admin/AdminRow"]
+layout_mode=2
+text="Verificar 123456"
+
+[node name="Raid" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=21
+
+[node name="RaidText" type="RichTextLabel" parent="Layout/Main/TabContainer/Raid"]
+custom_minimum_size=Vector2(0, 200)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="RaidRow" type="HBoxContainer" parent="Layout/Main/TabContainer/Raid"]
+layout_mode=2
+
+[node name="RaidStatus" type="Button" parent="Layout/Main/TabContainer/Raid/RaidRow"]
+layout_mode=2
+text="Status Raid (Seg/Qui)"
+
+[node name="RaidAttack" type="Button" parent="Layout/Main/TabContainer/Raid/RaidRow"]
+layout_mode=2
+text="Atacar Raid"
+
+[node name="RaidRanking" type="Button" parent="Layout/Main/TabContainer/Raid/RaidRow"]
+layout_mode=2
+text="Ranking DPS Guilda"
+
+[node name="Events" type="VBoxContainer" parent="Layout/Main/TabContainer"]
+layout_mode=2
+visible=false
+metadata/_tab_index=22
+
+[node name="EventsText" type="RichTextLabel" parent="Layout/Main/TabContainer/Events"]
+custom_minimum_size=Vector2(0, 200)
+layout_mode=2
+bbcode_enabled=true
+
+[node name="EventsRow" type="HBoxContainer" parent="Layout/Main/TabContainer/Events"]
+layout_mode=2
+
+[node name="EventsList" type="Button" parent="Layout/Main/TabContainer/Events/EventsRow"]
+layout_mode=2
+text="Eventos Sazonais"
+
+[node name="EventsProgress" type="Button" parent="Layout/Main/TabContainer/Events/EventsRow"]
+layout_mode=2
+text="Progresso +10"
+
+[node name="EventsShop" type="Button" parent="Layout/Main/TabContainer/Events/EventsRow"]
+layout_mode=2
+text="Shop Skin"
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode=1
+background_color=Color(0.12, 0.16, 0.22, 1)
+ambient_light_color=Color(0.8, 0.85, 0.95, 1)
+ambient_light_energy=0.9

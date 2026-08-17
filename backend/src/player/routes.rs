@@ -45,14 +45,17 @@ impl Gender { fn as_str(&self) -> &'static str { match self { Self::Male=>"male"
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "lowercase")]
-enum SoldierClass { Warrior, Archer }
+enum SoldierClass { Warrior, Archer, Mage, Assassin, Support }
 impl SoldierClass {
-    fn as_str(&self) -> &'static str { match self { Self::Warrior=>"warrior", Self::Archer=>"archer" } }
-    fn unlock_level(&self) -> i16 { match self { Self::Warrior=>5, Self::Archer=>15 } }
+    fn as_str(&self) -> &'static str { match self { Self::Warrior=>"warrior", Self::Archer=>"archer", Self::Mage=>"mage", Self::Assassin=>"assassin", Self::Support=>"support" } }
+    fn unlock_level(&self) -> i16 { match self { Self::Warrior=>5, Self::Archer=>15, Self::Mage=>25, Self::Assassin=>38, Self::Support=>55 } }
     fn valid_subclass(&self, value: &str) -> bool {
         match self {
             Self::Warrior => ["guardian","berserker","paladin"].contains(&value),
             Self::Archer => ["marksman","crossbowman","ranger"].contains(&value),
+            Self::Mage => ["elementalista","necromante","arcano"].contains(&value),
+            Self::Assassin => ["sombra","ninja","lamina_dupla"].contains(&value),
+            Self::Support => ["curandeiro","buffador","xama"].contains(&value),
         }
     }
 }

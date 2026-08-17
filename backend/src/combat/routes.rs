@@ -22,7 +22,7 @@ struct SquadRow { character_id: Uuid, slot: i16, class: String, formation: Strin
 pub fn configure(cfg: &mut web::ServiceConfig) { cfg.service(web::scope("/combat").route("/start", web::post().to(start))); }
 
 async fn start(state: web::Data<Arc<AppState>>, user: AuthenticatedUser, body: web::Json<StartCombat>) -> AppResult<HttpResponse> {
-    if !(1..=50).contains(&body.stage) { return Err(AppError::Validation("o MVP contém as fases 1 a 50".into())); }
+    if !(1..=500).contains(&body.stage) { return Err(AppError::Validation("fase deve estar entre 1 e 500 (10 capítulos)".into())); }
     let mut tx = state.db.begin().await?;
     let max_stage: i32 = sqlx::query_scalar("SELECT max_stage FROM stage_progress WHERE user_id=$1 FOR UPDATE").bind(user.user_id).fetch_optional(&mut *tx).await?.unwrap_or(0);
     if body.stage as i32 > max_stage + 1 { return Err(AppError::Validation("conclua a fase anterior primeiro".into())); }
@@ -52,6 +52,28 @@ async fn start(state: web::Data<Arc<AppState>>, user: AuthenticatedUser, body: w
         update_stars(&mut tx, user.user_id, body.stage, difficulty_name(&body.difficulty), stars).await?;
         sqlx::query("UPDATE users SET gold=gold+$2 WHERE id=$1").bind(user.user_id).bind(gold).execute(&mut *tx).await?;
         sqlx::query("INSERT INTO player_materials (user_id,material_code,quantity) VALUES ($1,'item_fragment_t1',1) ON CONFLICT (user_id,material_code) DO UPDATE SET quantity=player_materials.quantity+1,updated_at=now()").bind(user.user_id).execute(&mut *tx).await?;
+        // Recompensas de cosméticos: fragmentos sempre, essências em boss (cada 10 fases)
+        // Mantém progressão universal do Líder — 8 sistemas completos.
+        let cosmetics = ["wings","mount","pet","aura","mask","trail","hit_effect","frame"];
+        for kind in cosmetics {
+            let frags: i32 = 3 + (body.stage as i32 % 4) + if kind=="wings" || kind=="mount" {2} else {0};
+            sqlx::query("INSERT INTO cosmetic_progress (user_id,cosmetic_type,fragments) VALUES ($1,$2,$3) ON CONFLICT (user_id,cosmetic_type) DO UPDATE SET fragments=cosmetic_progress.fragments+EXCLUDED.fragments").bind(user.user_id).bind(kind).bind(frags).execute(&mut *tx).await?;
+        }
+        if body.stage % 10 == 0 {
+            // Boss de capítulo/capítulo final: essências para evolução de tier
+            let essence_amount = if body.stage >= 400 { 5 } else if body.stage >= 200 { 3 } else if body.stage >= 100 { 2 } else { 1 };
+            for kind in cosmetics {
+                sqlx::query("INSERT INTO cosmetic_progress (user_id,cosmetic_type,essences) VALUES ($1,$2,$3) ON CONFLICT (user_id,cosmetic_type) DO UPDATE SET essences=cosmetic_progress.essences+EXCLUDED.essences").bind(user.user_id).bind(kind).bind(essence_amount).execute(&mut *tx).await?;
+            }
+        }
+        // Battle Pass XP: 10-50 XP por fase (escala) + 50 XP por boss kill
+        let pass_xp = 10 + i64::from(body.stage) / 10 + if body.stage % 10 == 0 { 40 } else { 0 };
+        // Atualiza progresso do Battle Pass ativo (se houver season)
+        let season: Option<Uuid> = sqlx::query_scalar("SELECT id FROM battle_pass_seasons WHERE is_active=true LIMIT 1").fetch_optional(&mut *tx).await?;
+        if let Some(season_id) = season {
+            sqlx::query("INSERT INTO battle_pass_progress (user_id,season_id,xp) VALUES ($1,$2,$3) ON CONFLICT (user_id,season_id) DO UPDATE SET xp=battle_pass_progress.xp+EXCLUDED.xp, updated_at=now()").bind(user.user_id).bind(season_id).bind(pass_xp).execute(&mut *tx).await?;
+            sqlx::query("UPDATE battle_pass_progress SET level=LEAST(50::smallint, (xp/1000)::smallint) WHERE user_id=$1 AND season_id=$2").bind(user.user_id).bind(season_id).execute(&mut *tx).await?;
+        }
         level_up = grant_leader_experience(&mut tx, user.user_id, experience).await?;
     }
     sqlx::query("INSERT INTO audit_logs (actor_user_id,action,metadata) VALUES ($1,'COMBAT_RESOLVED',$2)").bind(user.user_id).bind(serde_json::json!({"combat_session_id":combat_id,"stage":body.stage,"victory":result.victory,"seed":seed,"stars":stars})).execute(&mut *tx).await?;
