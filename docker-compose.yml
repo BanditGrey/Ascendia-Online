@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ascendia
+      POSTGRES_USER: ascendia
+      POSTGRES_PASSWORD: ascendia_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ascendia -d ascendia"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    ports: ["5432:5432"]
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    ports: ["6379:6379"]
+
+  jwt-keys:
+    image: alpine:3.20
+    volumes:
+      - jwt_keys:/keys
+    command: >
+      sh -c "if [ ! -s /keys/private.pem ]; then
+      apk add --no-cache openssl >/dev/null &&
+      openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out /keys/private.pem &&
+      openssl rsa -pubout -in /keys/private.pem -out /keys/public.pem &&
+      chmod 644 /keys/*.pem; fi"
+
+  api:
+    build: .
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8080
+      DATABASE_URL: postgres://ascendia:ascendia_dev@postgres:5432/ascendia
+      REDIS_URL: redis://redis:6379
+      JWT_PRIVATE_KEY_PATH: /run/keys/private.pem
+      JWT_PUBLIC_KEY_PATH: /run/keys/public.pem
+      ACCESS_TOKEN_MINUTES: 15
+      REFRESH_TOKEN_DAYS: 30
+      ALLOWED_ORIGIN: ${ALLOWED_ORIGIN:-http://localhost:3000}
+      RUST_LOG: ${RUST_LOG:-ascendia_server=info,actix_web=info}
+    volumes:
+      - jwt_keys:/run/keys:ro
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      jwt-keys: { condition: service_completed_successfully }
+    ports: ["8080:8080"]
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  jwt_keys:
