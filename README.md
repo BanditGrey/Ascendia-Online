@@ -11,7 +11,7 @@ Este repositório contém a fundação da **Fase 1 (MVP Core)**. O primeiro incr
 - Redis 7 conectado e verificado no health check;
 - registro com Comandante M/F, squad inicial e stats base;
 - senha com Argon2id, access JWT RS256 de curta duração e refresh token rotativo;
-- combate autoritativo das fases 1–50 com seed auditável e scaling de boss;
+- combate autoritativo das fases 1–50 em três waves de squad, com seed, snapshot e eventos auditáveis;
 - algoritmo determinístico de raridade, com Luck e dificuldade limitados no servidor;
 - inventário autoritativo com listagem, equipar, desequipar e ownership validation;
 - recálculo de stats e Power Rating a partir de uma base imutável;
@@ -71,12 +71,57 @@ POST /api/v1/auth/refresh  { "refresh_token": "..." }
 POST /api/v1/auth/logout   Authorization: Bearer ...
 ```
 
+### Chat
+
+Todos os endpoints exigem access token:
+
+```text
+GET    /api/v1/chat/global?limit=50
+POST   /api/v1/chat/global    { "content": "Olá!" }
+POST   /api/v1/chat/whisper   { "recipient_user_id": "...", "content": "Olá!" }
+POST   /api/v1/chat/blocks    { "user_id": "..." }
+DELETE /api/v1/chat/blocks/{user_id}
+POST   /api/v1/chat/reports   { "message_id": "...", "reason": "spam" }
+```
+
+O global mantém histórico quente no Redis e fonte de verdade no PostgreSQL. Envios usam limite de uma mensagem por três segundos; blocks impedem whispers recebidos e reports são idempotentes por usuário/mensagem.
+
+### Recompensas offline
+
+```text
+POST /api/v1/offline-rewards/claim
+Authorization: Bearer <access_token>
+{ "idempotency_key": "UUID-gerado-pelo-cliente" }
+```
+
+A produção é calculada exclusivamente pelo servidor usando a última fase concluída: 50% da taxa ativa, teto de 12 horas (VIP: 24 horas). A mesma chave de idempotência sempre devolve o recibo original, inclusive em retries concorrentes.
+
+### Ranking de Power
+
+```text
+GET /api/v1/rankings/power?offset=0&limit=20
+Authorization: Bearer <access_token>
+```
+
+O ranking pagina até 50 entradas, mantém a ordem em Redis ZSET e se reconstrói automaticamente a partir de Líderes e Power Rating no PostgreSQL quando o cache estiver vazio. Alterações de stats atualizam a projeção após o commit da fonte de verdade.
+
+### Eventos de combate por WebSocket
+
+O cliente Godot deve abrir uma conexão autenticada e usar o último `sequence` recebido para retomada:
+
+```text
+GET /api/v1/ws/combat/{combat_id}?after_sequence=0
+Authorization: Bearer <access_token>
+```
+
+O servidor envia `WELCOME`, os eventos `COMBAT_STATE` persistidos e `HEARTBEAT`. Todas as mensagens incluem `version: 1`; `COMBAT_STATE` tem uma sequência monotônica por sessão. Responda aos ping/pong WebSocket (ou envie o texto `HEARTBEAT`) em até 45 segundos.
+
 ### Inventário e equipamentos
 
 Todos os endpoints abaixo exigem o access token:
 
 ```text
-GET  /api/v1/inventory
+GET  /api/v1/inventory?offset=0&limit=50
 GET  /api/v1/characters/{character_id}/stats
 POST /api/v1/inventory/equip
      { "character_id": "...", "item_id": "...", "slot_index": 1 }
@@ -99,7 +144,7 @@ PUT  /api/v1/squad/slot
      { "slot": 2, "character_id": "..." }
 ```
 
-Guerreiro desbloqueia no level 5 e Arqueiro no level 15. Os slots respeitam os níveis 1, 5, 15, 35, 55 e 80. Experiência de vitórias é aplicada ao Líder no servidor e pode subir múltiplos níveis sem perder XP excedente.
+Guerreiro desbloqueia no level 5 e Arqueiro no level 15. Os slots respeitam os níveis 1, 5, 15, 35, 55 e 80. O combate usa todos os integrantes ativos em três waves (Slime, Goblin e Lobo — Troll em fases múltiplas de 10); a resposta de `POST /combat/start` inclui o log ordenado de eventos e a melhor nota de 1–3 estrelas é persistida por fase/dificuldade. Experiência de vitórias é aplicada ao Líder no servidor e pode subir múltiplos níveis sem perder XP excedente.
 
 ## Testes
 

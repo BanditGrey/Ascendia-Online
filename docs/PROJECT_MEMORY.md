@@ -1,7 +1,7 @@
 # Memória do projeto
 
-Atualizado em: 2026-08-16
-Branch de desenvolvimento: `arena/01a00d08-ascendia-online`
+Atualizado em: 2026-08-17
+Branch de desenvolvimento: `arena/01a00d24-ascendia-online`
 
 ## Objetivo atual
 
@@ -30,6 +30,8 @@ Construir a vertical slice do MVP Core: autenticar, criar Comandante, progredir,
 - Duelo determinístico com seed do servidor.
 - ATK SPD, CRIT, ACC/DODGE, DEF e PEN.
 - Scaling de fases 1–50 e boss a cada 10 fases.
+- Sessões de combate auditáveis com snapshot do squad, três waves (Slime/Goblin/Lobo ou Troll) e log determinístico de eventos.
+- Melhor avaliação de 1–3 estrelas por fase/dificuldade, projetada transacionalmente em `stage_progress.total_stars`.
 - Dificuldades Normal, Hard, Inferno e Chaos.
 - Drop por raridade com Luck, bônus de dificuldade e limite por fase.
 - Persistência de combate, gold, XP, item, fragmento e auditoria.
@@ -42,6 +44,13 @@ Construir a vertical slice do MVP Core: autenticar, criar Comandante, progredir,
 - Stats base imutáveis separados dos stats calculados.
 - Recalculo de stats e Power Rating.
 - Enhancement +0–20, custo de fragmentos e probabilidades server-side.
+- Ranking de Power Rating paginado em Redis ZSET, reconstruível a partir do PostgreSQL.
+- Recompensas offline com recibo idempotente, 50% da produção e teto de 12h/24h VIP.
+- Chat global e whisper com histórico quente Redis, anti-spam, block/report e fonte de verdade PostgreSQL.
+- Formações/sinergias de squad, progressão de asas/montaria, paginação de inventário e revogação imediata de access token.
+- Cliente Godot inicial com login, Hub, squad e início de combate.
+
+Consulte [`HANDOFF.md`](HANDOFF.md) para o inventário de mudanças, contratos e checklist de retomada.
 
 ### Personagens e squad
 
@@ -66,12 +75,13 @@ Construir a vertical slice do MVP Core: autenticar, criar Comandante, progredir,
 - Toolchain Rust e Docker não estão disponíveis no sandbox atual; testes ainda precisam rodar em ambiente equipado.
 - GitHub App não possui permissão de workflows. O pipeline não será incluído no PR atual.
 - Access token continua válido até expirar após logout; revogação imediata será feita com cache de sessão Redis.
-- Ainda não há rate limiting, OAuth2, 2FA ou WebSocket.
-- Combate ainda agrega o Líder, não o squad inteiro nem waves.
+- Ainda não há rate limiting, OAuth2 ou 2FA.
+- WebSocket autenticado transmite e retoma eventos de sessões já resolvidas; streaming ao vivo ainda não existe.
+- Skills, DOT/HOT e targeting por role ainda não entram no cálculo.
 - Stats de cosméticos, sets, runas, sockets e enchants ainda não entram no cálculo.
 - Não há endpoint de inventário paginado.
 - Balanceamento atual é provisório e precisa de versão/snapshot.
 
 ## Próxima tarefa exata
 
-Implementar `combat_sessions` e engine de waves com snapshot do squad, inimigos Slime/Goblin/Lobo/Troll, targeting por role e log de eventos determinístico. Em seguida, expor os eventos por WebSocket autenticado.
+Implementar o streaming ao vivo de sessões de combate e iniciar o cliente Godot WebGL com login, hub e consumo dos contratos REST/WebSocket.

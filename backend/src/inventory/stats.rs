@@ -89,7 +89,20 @@ fn scaled_i64(values: &Value, key: &str, multiplier: f64) -> i64 {
     (number(values, key) * multiplier).round() as i64
 }
 
-fn power_rating(stats: &CalculatedStats) -> i64 {
+/// Asas e montaria concedem bônus globais, aplicados após equipamentos e antes do Power Rating.
+fn apply_cosmetics(stats: &mut CalculatedStats, cosmetics: &[(String, i16, i16)]) {
+    for (kind, tier, stars) in cosmetics {
+        let progress = i64::from(*tier - 1) * 10 + i64::from(*stars);
+        match kind.as_str() {
+            "wings" => { stats.attack += 10 + progress * 3; stats.crit_rate = (stats.crit_rate + progress as f64 * 0.002).min(1.0); }
+            "mount" => { stats.hp += 50 + progress * 20; stats.defense += 5 + progress * 2; }
+            _ => {}
+        }
+    }
+    stats.power_rating = power_rating(stats);
+}
+
+pub fn power_rating(stats: &CalculatedStats) -> i64 {
     let raw = stats.hp as f64 * 0.20
         + stats.attack as f64 * 4.0
         + stats.defense as f64 * 2.5
@@ -123,7 +136,7 @@ pub async fn recalculate(
     .bind(user_id)
     .fetch_all(&mut **tx)
     .await?;
-    let stats = calculate(
+    let mut stats = calculate(
         BaseStats {
             hp: b.0,
             attack: b.1,
@@ -138,6 +151,9 @@ pub async fn recalculate(
         },
         &items,
     );
+    let cosmetics: Vec<(String, i16, i16)> = sqlx::query_as("SELECT cosmetic_type,tier,stars FROM cosmetic_progress WHERE user_id=$1")
+        .bind(user_id).fetch_all(&mut **tx).await?;
+    apply_cosmetics(&mut stats, &cosmetics);
     sqlx::query("UPDATE character_stats SET hp=$2,attack=$3,defense=$4,attack_speed=$5,crit_rate=$6,crit_damage=$7,luck=$8,accuracy=$9,dodge=$10,penetration=$11,power_rating=$12,calculated_at=now() WHERE character_id=$1")
         .bind(character_id)
         .bind(stats.hp)

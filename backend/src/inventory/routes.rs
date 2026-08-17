@@ -11,6 +11,7 @@ use crate::{
     auth::middleware::AuthenticatedUser,
     error::{AppError, AppResult},
     inventory::stats::{recalculate, CalculatedStats},
+    ranking::refresh_user,
     state::AppState,
 };
 
@@ -30,6 +31,18 @@ pub struct InventoryItem {
     pub equipped_by: Option<Uuid>,
     pub equipped_slot: Option<String>,
 }
+
+#[derive(Debug, Deserialize)]
+pub struct InventoryQuery {
+    #[serde(default)]
+    pub offset: i64,
+    #[serde(default = "default_page_limit")]
+    pub limit: i64,
+}
+fn default_page_limit() -> i64 { 50 }
+
+#[derive(Debug, Serialize)]
+pub struct InventoryPage { pub items: Vec<InventoryItem>, pub offset: i64, pub limit: i64 }
 
 #[derive(Debug, Deserialize)]
 pub struct EquipRequest {
@@ -79,14 +92,15 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     .route("/characters/{character_id}/stats", web::get().to(get_stats));
 }
 
-async fn list(state: web::Data<Arc<AppState>>, user: AuthenticatedUser) -> AppResult<HttpResponse> {
+async fn list(state: web::Data<Arc<AppState>>, user: AuthenticatedUser, query: web::Query<InventoryQuery>) -> AppResult<HttpResponse> {
+    let limit = query.limit.clamp(1, 100);
+    let offset = query.offset.max(0);
     let items = sqlx::query_as::<_, InventoryItem>(
-        "SELECT i.id,t.code AS template_code,t.name,t.slot::text AS slot,t.rarity::text AS rarity,t.tier,i.quantity,i.enhancement,t.base_stats,i.rolled_stats,i.bound,e.character_id AS equipped_by,e.slot::text AS equipped_slot FROM inventory_items i JOIN item_templates t ON t.id=i.template_id LEFT JOIN equipment_slots e ON e.inventory_item_id=i.id WHERE i.user_id=$1 ORDER BY i.acquired_at DESC",
+        "SELECT i.id,t.code AS template_code,t.name,t.slot::text AS slot,t.rarity::text AS rarity,t.tier,i.quantity,i.enhancement,t.base_stats,i.rolled_stats,i.bound,e.character_id AS equipped_by,e.slot::text AS equipped_slot FROM inventory_items i JOIN item_templates t ON t.id=i.template_id LEFT JOIN equipment_slots e ON e.inventory_item_id=i.id WHERE i.user_id=$1 ORDER BY i.acquired_at DESC,i.id LIMIT $2 OFFSET $3",
     )
-    .bind(user.user_id)
-    .fetch_all(&state.db)
-    .await?;
-    Ok(HttpResponse::Ok().json(items))
+    .bind(user.user_id).bind(limit).bind(offset)
+    .fetch_all(&state.db).await?;
+    Ok(HttpResponse::Ok().json(InventoryPage { items, offset, limit }))
 }
 
 async fn equip(
@@ -121,6 +135,7 @@ async fn equip(
     let stats = recalculate(&mut tx, user.user_id, body.character_id).await?;
     audit(&mut tx, user.user_id, "ITEM_EQUIPPED", serde_json::json!({"item_id":body.item_id,"character_id":body.character_id,"slot":slot,"slot_index":body.slot_index})).await?;
     tx.commit().await?;
+    refresh_user(&state, user.user_id).await;
     Ok(HttpResponse::Ok().json(EquipmentResult { character_id: body.character_id, stats }))
 }
 
@@ -143,6 +158,7 @@ async fn unequip(
     let stats = recalculate(&mut tx, user.user_id, body.character_id).await?;
     audit(&mut tx, user.user_id, "ITEM_UNEQUIPPED", serde_json::json!({"character_id":body.character_id,"slot":body.slot,"slot_index":body.slot_index})).await?;
     tx.commit().await?;
+    refresh_user(&state, user.user_id).await;
     Ok(HttpResponse::Ok().json(EquipmentResult { character_id: body.character_id, stats }))
 }
 
@@ -189,6 +205,7 @@ async fn enhance(
     if let Some(character_id) = equipped { recalculate(&mut tx, user.user_id, character_id).await?; }
     audit(&mut tx, user.user_id, "ITEM_ENHANCEMENT_ATTEMPT", serde_json::json!({"item_id":body.item_id,"from":current,"to":target,"success":success,"cost":cost})).await?;
     tx.commit().await?;
+    refresh_user(&state, user.user_id).await;
     Ok(HttpResponse::Ok().json(EnhanceResult { item_id: body.item_id, success, enhancement: resulting_level, fragments_spent: cost }))
 }
 
