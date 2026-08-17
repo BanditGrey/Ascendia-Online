@@ -1,5 +1,6 @@
 use actix_web::{dev::Payload, web, FromRequest, HttpRequest};
-use std::{future::{ready, Ready}, sync::Arc};
+use redis::AsyncCommands;
+use std::{future::Future, pin::Pin, sync::Arc};
 use uuid::Uuid;
 
 use crate::{error::AppError, state::AppState};
@@ -12,16 +13,19 @@ pub struct AuthenticatedUser {
 
 impl FromRequest for AuthenticatedUser {
     type Error = AppError;
-    type Future = Ready<Result<Self, Self::Error>>;
+    type Future = Pin<Box<dyn Future<Output = Result<Self, Self::Error>>>>;
 
     fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
-        let result = (|| {
-            let state = req.app_data::<web::Data<Arc<AppState>>>().ok_or(AppError::Unauthorized)?;
-            let raw = req.headers().get("Authorization").and_then(|v| v.to_str().ok())
-                .and_then(|v| v.strip_prefix("Bearer ")).ok_or(AppError::Unauthorized)?;
-            let claims = state.tokens.verify(raw)?;
+        let state = req.app_data::<web::Data<Arc<AppState>>>().cloned();
+        let raw = req.headers().get("Authorization").and_then(|value| value.to_str().ok()).and_then(|value| value.strip_prefix("Bearer ")).map(str::to_owned);
+        Box::pin(async move {
+            let state = state.ok_or(AppError::Unauthorized)?;
+            let raw = raw.ok_or(AppError::Unauthorized)?;
+            let claims = state.tokens.verify(&raw)?;
+            let mut redis = state.redis.get_multiplexed_async_connection().await.map_err(|_| AppError::Unauthorized)?;
+            let revoked: bool = redis.exists(format!("auth:revoked:{}", claims.sid)).await.map_err(|_| AppError::Unauthorized)?;
+            if revoked { return Err(AppError::Unauthorized); }
             Ok(Self { user_id: claims.sub, session_id: claims.sid })
-        })();
-        ready(result)
+        })
     }
 }

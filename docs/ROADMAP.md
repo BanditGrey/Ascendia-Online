@@ -10,18 +10,18 @@ Legenda: ✅ concluído · 🚧 parcial · ⬜ pendente · ⛔ bloqueado
 | Registro/login/JWT/refresh | ✅ | Fluxo completo e refresh de uso único |
 | Comandante M/F | ✅ | Criado em transação com squad inicial |
 | Guerreiro e Arqueiro | ✅ | Unlock e subclasses validados no servidor |
-| Squad | 🚧 | Slots e ownership prontos; formações/sinergia pendentes |
-| Fases 1–50 | 🚧 | Progressão e scaling prontos; waves e estrelas pendentes |
-| Combate autoritativo | 🚧 | Duelo pronto; squad, skills, DOT/HOT e eventos pendentes |
+| Squad | ✅ | Slots, ownership, formações e sinergias autoritativas |
+| Fases 1–50 | 🚧 | Progressão, scaling, 3 waves e estrelas prontas; tabelas por mob ainda pendentes |
+| Combate autoritativo | 🚧 | Squad e sessões com eventos persistidos prontos; skills, DOT/HOT e streaming WS pendentes |
 | Drops/raridades | 🚧 | Roll e persistência prontos; tabelas por mob/fase pendentes |
-| Inventário/equipamento | 🚧 | Equip e enhancement prontos; paginação, runas e sets pendentes |
-| Stats/Power Rating | 🚧 | Núcleo pronto; cosméticos, sets e Redis ranking pendentes |
-| Asas T1–T3/Montaria T1–T2 | ⬜ | Progressão, estrelas, equip visual e stats globais |
-| WebSocket | ⬜ | Auth, heartbeat, sequência, retomada e eventos MVP |
-| Chat global/whisper | ⬜ | Histórico Redis, anti-spam, block/report |
-| Ranking power | ⬜ | ZSET reconstruível e endpoint paginado |
-| Offline rewards | ⬜ | Claim idempotente, 50%, teto 12h e VIP 24h |
-| Cliente Godot WebGL | ⬜ | Login, hub, combate, HUD, inventário, chat e ranking |
+| Inventário/equipamento | 🚧 | Equip, enhancement e paginação prontos; runas e sets pendentes |
+| Stats/Power Rating | 🚧 | Núcleo, cosméticos e projeção Redis ZSET prontos; sets pendentes |
+| Asas T1–T3/Montaria T1–T2 | 🚧 | Progressão, estrelas e stats globais prontos; equip visual e fontes de fragmentos pendentes |
+| WebSocket | 🚧 | Auth no upgrade, heartbeat, sequência, retomada e eventos de combate resolvido prontos; streaming ao vivo pendente |
+| Chat global/whisper | ✅ | Histórico Redis, anti-spam, block/report e persistência para moderação |
+| Ranking power | ✅ | ZSET reconstruível, atualização pós-commit e endpoint paginado |
+| Offline rewards | ✅ | Claim idempotente, 50%, teto 12h e VIP 24h |
+| Cliente Godot WebGL | 🚧 | Login, hub e início de combate prontos; HUD, inventário, chat, ranking e WS pendentes |
 | CI GitHub Actions | ⛔ | Bloqueado por permissão `workflows` do GitHub App |
 
 ## Pós-MVP

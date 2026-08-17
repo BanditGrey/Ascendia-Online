@@ -1,11 +1,17 @@
 mod auth;
+mod chat;
 mod combat;
 mod config;
+mod cosmetics;
 mod error;
 mod http;
 mod inventory;
+mod offline_rewards;
 mod player;
+mod ranking;
+mod squad;
 mod state;
+mod ws;
 
 use std::sync::Arc;
 use actix_cors::Cors;
@@ -32,7 +38,7 @@ async fn main() -> AppResult<()> {
             .wrap(cors)
             .wrap(Logger::default())
             .route("/health", web::get().to(http::health::health))
-            .service(web::scope("/api/v1").configure(auth::routes::configure).configure(combat::routes::configure).configure(inventory::routes::configure).configure(player::routes::configure))
+            .service(web::scope("/api/v1").configure(auth::routes::configure).configure(chat::configure).configure(combat::routes::configure).configure(cosmetics::configure).configure(inventory::routes::configure).configure(offline_rewards::configure).configure(player::routes::configure).configure(ranking::configure).route("/ws/combat/{combat_id}", web::get().to(ws::combat_stream)))
     })
     .bind(bind).map_err(|e| error::AppError::Config(format!("bind: {e}")))?
     .run().await.map_err(|e| error::AppError::Internal(format!("servidor: {e}")))

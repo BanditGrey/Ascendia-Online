@@ -123,6 +123,7 @@ async fn refresh(state: web::Data<Arc<AppState>>, body: web::Json<RefreshRequest
     let response = create_session(&state, &mut tx, user_id, &req).await?;
     audit(&mut tx, user_id, "TOKEN_REFRESHED", serde_json::json!({ "old_session": old_session })).await?;
     tx.commit().await?;
+    revoke_access(&state, old_session).await;
     Ok(HttpResponse::Ok().json(response))
 }
 
@@ -132,7 +133,21 @@ async fn logout(state: web::Data<Arc<AppState>>, user: AuthenticatedUser) -> App
         .bind(user.session_id).bind(user.user_id).execute(&mut *tx).await?;
     audit(&mut tx, user.user_id, "USER_LOGOUT", serde_json::json!({ "session_id": user.session_id })).await?;
     tx.commit().await?;
+    revoke_access(&state, user.session_id).await;
     Ok(HttpResponse::NoContent().finish())
+}
+
+/// Redis é uma lista de revogação de curta duração; PostgreSQL continua sendo a autoridade da sessão.
+async fn revoke_access(state: &AppState, session_id: Uuid) {
+    use redis::AsyncCommands;
+    match state.redis.get_multiplexed_async_connection().await {
+        Ok(mut redis) => {
+            let key = format!("auth:revoked:{session_id}");
+            let result: redis::RedisResult<()> = redis.set_ex(key, "1", state.config.access_token_minutes.max(1) as u64 * 60).await;
+            if let Err(error) = result { log::warn!("não foi possível projetar revogação de sessão: {error}"); }
+        }
+        Err(error) => log::warn!("não foi possível conectar Redis para revogar sessão: {error}"),
+    }
 }
 
 async fn create_session(state: &AppState, tx: &mut sqlx::Transaction<'_, Postgres>, user_id: Uuid, req: &HttpRequest) -> AppResult<AuthResponse> {

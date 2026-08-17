@@ -39,7 +39,7 @@ Além disso, revisar migrations, concorrência, idempotência, vazamento de dado
 
 ## Git e entregas
 
-- Branch desta sessão: `arena/01a00d08-ascendia-online`.
+- Branch desta sessão: `arena/01a00d24-ascendia-online`.
 - Commits pequenos por domínio, em Conventional Commits.
 - Não incluir segredos, chaves RSA, `.env`, assets binários grandes ou dados locais.
 - O GitHub App atual não possui permissão para alterar workflows. Não adicionar arquivos em `.github/workflows/` até a integração receber `Workflows: read/write`.

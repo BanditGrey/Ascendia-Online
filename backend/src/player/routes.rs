@@ -60,6 +60,9 @@ impl SoldierClass {
 #[derive(Debug, Deserialize)]
 struct SetSquadSlot { slot: i16, character_id: Option<Uuid> }
 
+#[derive(Debug, Deserialize)]
+struct SetFormation { formation: String }
+
 #[derive(Debug, FromRow, Serialize)]
 struct SquadSlotView { slot: i16, character_id: Uuid, name: String, class: String, subclass: String, level: i16 }
 
@@ -72,7 +75,8 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     .service(
         web::scope("/squad")
             .route("", web::get().to(get_squad))
-            .route("/slot", web::put().to(set_squad_slot)),
+            .route("/slot", web::put().to(set_squad_slot))
+            .route("/formation", web::put().to(set_formation)),
     );
 }
 
@@ -136,6 +140,16 @@ async fn set_squad_slot(state: web::Data<Arc<AppState>>, user: AuthenticatedUser
         }
     }
     audit(&mut tx,user.user_id,"SQUAD_CHANGED",serde_json::json!({"slot":body.slot,"character_id":body.character_id})).await?;
+    tx.commit().await?;
+    Ok(HttpResponse::NoContent().finish())
+}
+
+async fn set_formation(state: web::Data<Arc<AppState>>, user: AuthenticatedUser, body: web::Json<SetFormation>) -> AppResult<HttpResponse> {
+    if !["balanced", "vanguard", "assault"].contains(&body.formation.as_str()) { return Err(AppError::Validation("formação inválida".into())); }
+    let mut tx = state.db.begin().await?;
+    let updated = sqlx::query("UPDATE squads SET formation=$2 WHERE user_id=$1 AND is_active=true").bind(user.user_id).bind(&body.formation).execute(&mut *tx).await?.rows_affected();
+    if updated == 0 { return Err(AppError::NotFound); }
+    audit(&mut tx, user.user_id, "SQUAD_FORMATION_CHANGED", serde_json::json!({"formation":body.formation})).await?;
     tx.commit().await?;
     Ok(HttpResponse::NoContent().finish())
 }
