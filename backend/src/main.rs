@@ -64,7 +64,7 @@ async fn main() -> AppResult<()> {
             .wrap(cors)
             .wrap(Logger::default())
             .route("/health", web::get().to(http::health::health))
-            .route("/metrics", web::get().to(http::health::health))
+            .route("/metrics", web::get().to(http::health::metrics))
             .service(web::scope("/api/v1")
                 .configure(auth::routes::configure)
                 .configure(oauth::configure)
