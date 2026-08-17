@@ -47,23 +47,26 @@ pub async fn refresh_user(state: &AppState, user_id: Uuid) {
 /// Redis é apenas a projeção ordenada. Em cache vazio ela é reconstruída a partir do PostgreSQL.
 async fn power(state: web::Data<Arc<AppState>>, _user: AuthenticatedUser, query: web::Query<RankingQuery>) -> AppResult<HttpResponse> {
     let limit = query.limit.clamp(1, MAX_PAGE_SIZE);
-    let start = query.offset;
+    let start = query.offset.min(isize::MAX as usize);
     let end = start.saturating_add(limit).saturating_sub(1);
     let mut connection = state.redis.get_multiplexed_async_connection().await?;
-    let mut ids: Vec<String> = connection.zrevrange(POWER_KEY, start, end).await?;
+    let mut ids: Vec<String> = connection.zrevrange(POWER_KEY, start as isize, end as isize).await?;
     let mut rebuilt = false;
     if ids.is_empty() && query.offset == 0 {
         rebuild(&state, &mut connection).await?;
-        ids = connection.zrevrange(POWER_KEY, start, end).await?;
+        ids = connection.zrevrange(POWER_KEY, start as isize, end as isize).await?;
         rebuilt = true;
     }
     let parsed_ids: Vec<Uuid> = ids.iter().filter_map(|id| Uuid::parse_str(id).ok()).collect();
     let rows = ranking_rows(&state, &parsed_ids).await?;
-    let entries = ids.iter().enumerate().filter_map(|(index, id)| {
-        let user_id = Uuid::parse_str(id).ok()?;
-        let row = rows.iter().find(|row| row.user_id == user_id)?;
-        Some(RankingEntry { rank: start + index + 1, user_id, display_name: row.display_name.clone(), character_name: row.character_name.clone(), level: row.level, power_rating: row.power_rating })
-    }).collect();
+    // Reconstrói ranks contíguos: entradas obsoletas do cache (usuários removidos/inativos)
+    // são descartadas sem abrir buracos na numeração.
+    let mut entries = Vec::with_capacity(ids.len());
+    for id in &ids {
+        let Ok(user_id) = Uuid::parse_str(id) else { continue; };
+        let Some(row) = rows.iter().find(|row| row.user_id == user_id) else { continue; };
+        entries.push(RankingEntry { rank: start + entries.len() + 1, user_id, display_name: row.display_name.clone(), character_name: row.character_name.clone(), level: row.level, power_rating: row.power_rating });
+    }
     Ok(HttpResponse::Ok().json(RankingPage { entries, offset: start, limit, rebuilt }))
 }
 

@@ -117,7 +117,10 @@ async fn equip(
     .bind(user.user_id)
     .fetch_optional(&mut *tx)
     .await?;
-    let slot = item_slot.flatten().ok_or_else(|| AppError::Validation("este item não é equipável".into()))?;
+    // Distingue "item inexistente/não pertence ao jogador" (404) de "item sem slot" (400).
+    let slot = item_slot
+        .ok_or(AppError::NotFound)?
+        .ok_or_else(|| AppError::Validation("este item não é equipável".into()))?;
     validate_slot_index(&slot, body.slot_index)?;
 
     // Permite mover o item atomicamente e devolve ao inventário o item substituído.
