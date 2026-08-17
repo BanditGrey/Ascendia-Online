@@ -19,6 +19,7 @@ mod guild;
 mod guild_war;
 mod http;
 mod inventory;
+mod island;
 mod marketplace;
 mod oauth;
 mod offline_rewards;
@@ -98,6 +99,7 @@ async fn main() -> AppResult<()> {
                 .configure(raid::configure)
                 .configure(enchant::configure)
                 .configure(events::configure)
+                .configure(island::configure)
                 .configure(admin::configure)
                 .route("/ws/combat/{combat_id}", web::get().to(ws::combat_stream)))
     })

@@ -1,0 +1,33 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ilha do Abismo — Ascendia</title>
+<style>:root{--bg:#0a1620;--card:#111f2e;--line:#1e3347;--accent:#4dd0e1;--text:#e0f7fa;--muted:#8ab4c0}*{box-sizing:border-box}body{margin:0;background:radial-gradient(800px 400px at 50% 0%, #0e2a3a 0%, #0a1620 60%);color:var(--text);font:14px system-ui}header{padding:16px 24px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;backdrop-filter:blur(8px);background:rgba(10,22,32,.8)}header a{color:var(--text);text-decoration:none;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:12px}.hero{max-width:1100px;margin:24px auto;padding:0 24px;display:grid;grid-template-columns:1.1fr .9fr;gap:24px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}.btn{display:inline-block;padding:10px 16px;border-radius:999px;background:var(--accent);color:#0a1620;font-weight:700;text-decoration:none;border:1px solid var(--accent)}.grid{max-width:1100px;margin:24px auto;padding:0 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}code{background:#0f1f2e;padding:2px 6px;border-radius:6px;border:1px solid var(--line);font-size:12px}</style>
+</head><body>
+<header><b>🏝️ Ilha do Abismo Profundo</b> — 501-550 <a href="index.html">Portal</a> <a href="https://8001-i26fgc5pp3omxssa0zcnx.e2b.app/portal/index.html" target="_blank">Jogar</a> <span style="margin-left:auto;color:var(--muted)">Requer Fase 500 + 5000 Gold</span></header>
+<div class="hero">
+  <div>
+    <div style="display:inline-block;padding:4px 8px;border-radius:999px;background:#0f2a3a;border:1px solid #1e4a5a;font-size:11px">NOVO CONTEÚDO PÓS-500 • 3 MOBS + LEVIATÃ 550 • LOOT PRIMORDIAL</div>
+    <h2 style="font-size:28px;margin:12px 0 8px">Abismo aquático bioluminescente</h2>
+    <p style="color:var(--muted)">Desbloqueie via portal pagando 5000 Gold após completar <code>Origem Primordial 500 O Criador</code>. Mobs: <code>abyssal_horror</code> <code>deep_one</code> <code>leviathan_spawn</code> — Boss: <b>Leviatã Ancião 550</b> — Loot: <code>Lâmina Abissal</code> <code>Coração do Abismo</code> <code>Coroa do Leviatã</code> + Skins <code>Asas Abissais</code></p>
+    <div style="display:flex;gap:12px;margin-top:16px">
+      <a class="btn" href="#" onclick="unlock();return false">🔓 Desbloquear Ilha (5000 Gold)</a>
+      <a class="btn" style="background:transparent;color:var(--text);border-color:var(--line)" href="#" onclick="enter();return false">⚔️ Entrar 501</a>
+    </div>
+    <pre id="status" style="background:#0f1f2e;padding:12px;border-radius:8px;border:1px solid var(--line);margin-top:12px">Carregando status...</pre>
+  </div>
+  <div class="card">
+    <h3 style="margin:0 0 8px;color:var(--accent)">Requisitos</h3>
+    <div id="req">Verificando...</div>
+  </div>
+</div>
+<div class="grid">
+  <div class="card"><h3>👾 Mobs Ilha</h3><p style="color:var(--muted)"><code>abyssal_horror</code> 7.4KB<br><code>deep_one</code> 6.0KB<br><code>leviathan_spawn</code> 8.3KB</p></div>
+  <div class="card"><h3>👑 Boss 550</h3><p style="color:var(--muted)">Leviatã Ancião 2.3KB box 1.6×0.9 + 2 barbatanas + 2 chifres. Drop Primordial.</p></div>
+  <div class="card"><h3>🎁 Skins Ilha</h3><p style="color:var(--muted)">Asas Abissais, Leviatã, Kraken Bebê — tradáveis.</p></div>
+</div>
+<script>
+async function api(p,opts={}){let t=localStorage.getItem("mock_token");if(t)opts.headers={...(opts.headers||{}),Authorization:"Bearer "+t,"Content-Type":"application/json"};let r=await fetch(p,opts);return r.json()}
+async function load(){let s=await fetch("/api/v1/island/status",{headers:{Authorization:"Bearer "+(localStorage.getItem("mock_token")||"mock")}}).then(r=>r.json()).catch(()=>({max_stage:0,gold:0,can_unlock:false}));document.getElementById("status").textContent=JSON.stringify(s,null,2);document.getElementById("req").innerHTML=`Fase ${s.max_stage||0}/500 — Gold ${s.gold||0}/5000 — ${s.can_unlock?"<b style='color:#4dd0e1'>Pronto para desbloquear</b>":"Bloqueado"}`;}
+async function unlock(){let r=await api("/api/v1/island/unlock",{method:"POST"});alert(JSON.stringify(r));load()}
+async function enter(){let r=await api("/api/v1/island/enter/501",{method:"POST"});alert(JSON.stringify(r))}
+load()
+</script>
+</body></html>

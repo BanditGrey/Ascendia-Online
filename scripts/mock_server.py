@@ -3,7 +3,7 @@ import http.server, socketserver, json, os, urllib.parse, uuid, time
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent / "client-godot"
-PORT = 8001
+PORT = 8002
 
 # In-memory mock DB
 users = {}
@@ -61,6 +61,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 return
             if path.startswith("/api/v1/battle-pass"):
                 self.send_json({"season":{"name":"Season 1 — Inferno","starts_at":"2026-08-18","ends_at":"2026-09-17"},"progress":{"level":5,"xp":5200,"premium":False},"next_level_xp":6000})
+                return
+            if path.startswith("/api/v1/island/status"):
+                self.send_json({"island":"abyss_island","name":"Ilha do Abismo Profundo","range":"501-550","max_stage":500,"gold":5200,"can_unlock":True,"unlocked":False,"island_max":501})
                 return
             if path.startswith("/api/v1/tower/status"):
                 self.send_json({"current_floor":12,"best_floor":15,"next_floor":16,"is_boss":False,"rewards_preview":"Fragmentos + Gold"})
@@ -136,6 +139,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return
         if path.startswith("/api/v1/dungeons/run"):
             self.send_json({"dungeon_type":data.get("type","exp"),"gold":50,"xp":80,"frags":4})
+            return
+        if path.startswith("/api/v1/island/unlock"):
+            self.send_json({"unlocked":"abyss_island","stage":501,"reward":"wings_t8_island_abyss"})
+            return
+        if path.startswith("/api/v1/island/enter"):
+            self.send_json({"stage":501,"island":"abyss_island","enemies":["abyssal_horror","deep_one"],"boss":False})
             return
         if path.startswith("/api/v1/enchant"):
             self.send_json({"enchanted":data.get("inventory_item_id"),"rolled_stats":{"crit_rate":0.03}})
