@@ -36,7 +36,7 @@ O endpoint atual resolve um duelo agregado para validar a vertical slice. O incr
 
 ## Próximos incrementos
 
-1. **Items + Inventory + Stats**: tabela de affixes, drop persistido, equip/unequip com ownership e cálculo de Power Rating.
+1. **Items + Inventory + Stats (em andamento)**: drop persistido, equip/unequip com ownership, enhancement e cálculo de Power Rating estão implementados. Affixes, sockets, runas, sets e enchant vêm no próximo incremento de itens.
 2. **Combat session**: 3–5 waves, Slime/Goblin/Lobo, Troll a cada 10 fases, skills automáticas e snapshot de balanceamento.
 3. **WebSocket**: autenticação no upgrade, sequência monotônica, heartbeat, `COMBAT_STATE`, `ITEM_DROP` e retomada.
 4. **Offline rewards**: lease distribuído, cálculo pela última fase concluída, teto de 12h e claim idempotente.

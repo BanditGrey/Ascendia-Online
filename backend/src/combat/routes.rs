@@ -81,6 +81,8 @@ async fn start(state: web::Data<Arc<AppState>>, user: AuthenticatedUser, body: w
         sqlx::query("INSERT INTO stage_progress (user_id,max_stage,total_stars) VALUES ($1,$2,1) ON CONFLICT (user_id) DO UPDATE SET max_stage=GREATEST(stage_progress.max_stage,EXCLUDED.max_stage), total_stars=stage_progress.total_stars+CASE WHEN EXCLUDED.max_stage>stage_progress.max_stage THEN 1 ELSE 0 END, updated_at=now()")
             .bind(user.user_id).bind(body.stage as i32).execute(&mut *tx).await?;
         sqlx::query("UPDATE users SET gold=gold+$2 WHERE id=$1").bind(user.user_id).bind(gold).execute(&mut *tx).await?;
+        sqlx::query("INSERT INTO player_materials (user_id,material_code,quantity) VALUES ($1,'item_fragment_t1',1) ON CONFLICT (user_id,material_code) DO UPDATE SET quantity=player_materials.quantity+1,updated_at=now()")
+            .bind(user.user_id).execute(&mut *tx).await?;
     }
     sqlx::query("INSERT INTO audit_logs (actor_user_id,action,metadata) VALUES ($1,'COMBAT_RESOLVED',$2)")
         .bind(user.user_id).bind(serde_json::json!({"combat_id":combat_id,"stage":body.stage,"victory":result.victory,"seed":seed})).execute(&mut *tx).await?;

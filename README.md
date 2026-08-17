@@ -13,7 +13,11 @@ Este repositório contém a fundação da **Fase 1 (MVP Core)**. O primeiro incr
 - senha com Argon2id, access JWT RS256 de curta duração e refresh token rotativo;
 - combate autoritativo das fases 1–50 com seed auditável e scaling de boss;
 - algoritmo determinístico de raridade, com Luck e dificuldade limitados no servidor;
-- testes unitários de combate e drops;
+- inventário autoritativo com listagem, equipar, desequipar e ownership validation;
+- recálculo de stats e Power Rating a partir de uma base imutável;
+- enhancement +0 a +20 com custos e chances definidos no servidor;
+- fragmentos de equipamento concedidos em vitórias e consumidos atomicamente;
+- testes unitários de combate, drops, stats, slots e enhancement;
 - Docker Compose completo e CI com fmt, Clippy e testes.
 
 Consulte [`docs/architecture.md`](docs/architecture.md) para decisões e próximos incrementos.
@@ -66,6 +70,23 @@ Rotação e logout:
 POST /api/v1/auth/refresh  { "refresh_token": "..." }
 POST /api/v1/auth/logout   Authorization: Bearer ...
 ```
+
+### Inventário e equipamentos
+
+Todos os endpoints abaixo exigem o access token:
+
+```text
+GET  /api/v1/inventory
+GET  /api/v1/characters/{character_id}/stats
+POST /api/v1/inventory/equip
+     { "character_id": "...", "item_id": "...", "slot_index": 1 }
+POST /api/v1/inventory/unequip
+     { "character_id": "...", "slot": "main_hand", "slot_index": 1 }
+POST /api/v1/inventory/enhance
+     { "item_id": "..." }
+```
+
+Equipar, substituir, desequipar, consumir fragmentos e recalcular stats acontece dentro de uma única transação PostgreSQL. IDs, ownership, tipo e índice do slot são validados no servidor.
 
 ## Testes
 

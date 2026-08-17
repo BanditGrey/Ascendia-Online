@@ -8,7 +8,7 @@ use sqlx::Postgres;
 use uuid::Uuid;
 use validator::Validate;
 
-use crate::{auth::{middleware::AuthenticatedUser, token::{new_refresh_token, token_hash}}, error::{AppError, AppResult}, state::AppState};
+use crate::{auth::{middleware::AuthenticatedUser, token::{new_refresh_token, token_hash}}, error::{AppError, AppResult}, inventory::stats::recalculate, state::AppState};
 
 #[derive(Debug, Deserialize, Validate)]
 pub struct RegisterRequest {
@@ -80,6 +80,9 @@ async fn register(state: web::Data<Arc<AppState>>, body: web::Json<RegisterReque
         .execute(&mut *tx).await?;
     sqlx::query("INSERT INTO character_stats (character_id) VALUES ($1)")
         .bind(character_id).execute(&mut *tx).await?;
+    sqlx::query("INSERT INTO character_base_stats (character_id) VALUES ($1)")
+        .bind(character_id).execute(&mut *tx).await?;
+    recalculate(&mut tx, user_id, character_id).await?;
     let squad_id = Uuid::new_v4();
     sqlx::query("INSERT INTO squads (id,user_id,name) VALUES ($1,$2,'Principal')")
         .bind(squad_id).bind(user_id).execute(&mut *tx).await?;
