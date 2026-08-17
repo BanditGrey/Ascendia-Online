@@ -41,3 +41,8 @@ renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.06, 0.06, 0.09, 1)
 environment/glow/enabled=true
+meshes/lod/lod_change/threshold_pixels=1.0
+rendering/mesh_lod/lod_change/threshold_pixels=1.0
+
+[import]
+importer_defaults/texture={ "compress/mode": 2, "compress/basisu_enabled": true, "compress/hdr_compression": 0, "compress/bptc_enabled": false }

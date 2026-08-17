@@ -31,43 +31,59 @@ func _ready() -> void:
 		pass
 
 func _setup_arena() -> void:
-	# Chão da Floresta Encantada (Capítulo 1)
+	# Chão Floresta com LOD + MultiMesh otimizado para WebGL (1 draw call)
 	var ground := MeshInstance3D.new()
 	ground.mesh = PlaneMesh.new()
-	(ground.mesh as PlaneMesh).size = Vector2(24, 24)
+	(ground.mesh as PlaneMesh).size = Vector2(28, 28)
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = Color(0.18, 0.32, 0.18)
-	mat.roughness = 0.9
+	mat.roughness = 0.92
+	# Basis Universal já no import GLB, LOD automático Godot 4
 	ground.material_override = mat
 	ground.position = Vector3(0, -0.5, 0)
 	add_child(ground)
-	# Árvores simples de floresta para ambientação
-	for i in range(6):
-		var trunk := MeshInstance3D.new()
-		trunk.mesh = CylinderMesh.new()
-		(trunk.mesh as CylinderMesh).height = 4.0
-		(trunk.mesh as CylinderMesh).top_radius = 0.2
-		(trunk.mesh as CylinderMesh).bottom_radius = 0.3
-		var tmat := StandardMaterial3D.new()
-		tmat.albedo_color = Color(0.4, 0.25, 0.15)
-		trunk.material_override = tmat
-		trunk.position = Vector3(randf_range(-10, -6), 1.5, randf_range(-8, 8))
-		add_child(trunk)
-		var leaves := MeshInstance3D.new()
-		leaves.mesh = SphereMesh.new()
-		(leaves.mesh as SphereMesh).radius = 1.1
-		(leaves.mesh as SphereMesh).height = 1.6
-		var lmat := StandardMaterial3D.new()
-		lmat.albedo_color = Color(0.15, 0.55, 0.2)
-		leaves.material_override = lmat
-		leaves.position = trunk.position + Vector3(0, 2.2, 0)
-		add_child(leaves)
-	# Luz ambiente adicional
-	var env_light := OmniLight3D.new()
-	env_light.light_energy = 0.6
-	env_light.omni_range = 30
-	env_light.position = Vector3(0, 8, 0)
+	# MultiMesh árvores handcraft 111 GLBs (3 variações) — 1 draw call vs 12
+	var mm := MultiMeshInstance3D.new()
+	var mm_mesh := MeshInstance3D.new()
+	# Tenta carregar GLB handcraft, fallback para Cylinder
+	var tree_glb_path := "res://assets/env/tree_00.glb"
+	if ResourceLoader.exists(tree_glb_path):
+		var glb = load(tree_glb_path)
+		if glb is PackedScene:
+			var inst = (glb as PackedScene).instantiate() as Node3D
+			if inst:
+				for child in inst.get_children():
+					if child is MeshInstance3D:
+						mm_mesh = child
+						break
+	if mm_mesh.mesh == null:
+		mm_mesh.mesh = CylinderMesh.new()
+	mm.multimesh = MultiMesh.new()
+	mm.multimesh.mesh = mm_mesh.mesh
+	mm.multimesh.transform_format = MultiMesh.TRANSFORM_3D
+	mm.multimesh.instance_count = 18
+	# Posiciona 18 árvores com variação
+	for i in range(18):
+		var t := Transform3D(Basis(), Vector3(randf_range(-14, -7), 0, randf_range(-10, 10)))
+		mm.multimesh.set_instance_transform(i, t)
+	add_child(mm)
+	# Luz baked (WebGL 1 luz direcional + ambient, sem Omni dinâmico)
+	var env_light := DirectionalLight3D.new()
+	env_light.light_energy = 0.85
+	env_light.shadow_enabled = true
+	env_light.position = Vector3(6, 10, 6)
+	env_light.look_at(Vector3.ZERO, Vector3.UP)
 	add_child(env_light)
+	# WorldEnvironment com fog para profundidade LOD
+	var world_env := WorldEnvironment.new()
+	var env := Environment.new()
+	env.background_mode = Environment.BG_COLOR
+	env.background_color = Color(0.12, 0.16, 0.22)
+	env.fog_enabled = true
+	env.fog_light_color = Color(0.6, 0.7, 0.8)
+	env.fog_light_energy = 0.18
+	world_env.environment = env
+	add_child(world_env)
 
 func clear_battle() -> void:
 	for n in squad_nodes:
@@ -88,12 +104,14 @@ func _spawn_demo_squad() -> void:
 func _try_spawn_glb(index: int, char_class: String, gender_short: String, pos: Vector3, tier_wings: int, stars_wings: int) -> bool:
 	var path := "res://assets/characters/%s_%s.glb" % [char_class, gender_short]
 	if not ResourceLoader.exists(path):
-		return false
+		# Fallback extra_m/f para classes não encontradas
+		path = "res://assets/characters/extra_%s.glb" % gender_short
+		if not ResourceLoader.exists(path):
+			return false
 	var packed: PackedScene = load(path) as PackedScene
 	if packed == null:
 		var scene = load(path)
 		if scene == null: return false
-	# Instancia GLB (Scene com MeshInstance)
 	var root := Node3D.new()
 	root.position = pos
 	root.name = "Squad_%d_%s_GLB" % [index, char_class]
@@ -104,29 +122,56 @@ func _try_spawn_glb(index: int, char_class: String, gender_short: String, pos: V
 	else:
 		instance = (scene as PackedScene).instantiate() as Node3D if scene is PackedScene else null
 	if instance:
-		# Normaliza escala cartoon WebGL
-		instance.scale = Vector3(0.9, 0.9, 0.9)
+		instance.scale = Vector3(0.92, 0.92, 0.92)
+		# LOD: Godot 4 gera automático, mas forçamos distância
+		for child in instance.get_children():
+			if child is MeshInstance3D:
+				(child as MeshInstance3D).lod_bias = 0.5
 		root.add_child(instance)
-		# Asas como GLB filho do chest
+		# Montaria via BoneAttachment3D (se classe tiver mount tier)
 		if tier_wings >= 1:
 			var wing_path := "res://assets/cosmetics/wings/wings_t%d.glb" % tier_wings
 			if ResourceLoader.exists(wing_path):
 				var wing_scene = load(wing_path)
 				if wing_scene:
-					var wroot := Node3D.new()
-					wroot.position = Vector3(0, 1.1, -0.25)
+					var wroot := BoneAttachment3D.new() if instance.get_node_or_null("Skeleton3D") else Node3D.new()
+					if wroot is BoneAttachment3D:
+						(wroot as BoneAttachment3D).bone_name = "Spine"
+					else:
+						wroot.position = Vector3(0, 1.15, -0.22)
 					var wnode = (wing_scene as PackedScene).instantiate() as Node3D if wing_scene is PackedScene else null
-					if wnode: wroot.add_child(wnode)
+					if wnode:
+						wnode.scale = Vector3(0.85,0.85,0.85)
+						wroot.add_child(wnode)
 					root.add_child(wroot)
+		# Placa HP + AnimationPlayer se existir
+		var anim: AnimationPlayer = instance.get_node_or_null("AnimationPlayer") as AnimationPlayer
+		if anim and anim.has_animation("idle"):
+			anim.play("idle")
+		else:
+			# Fallback bob
+			var tween := create_tween()
+			tween.set_loops()
+			tween.tween_property(root, "position:y", pos.y + 0.06, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+			tween.tween_property(root, "position:y", pos.y, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		squad_nodes.append(root)
-		var tween := create_tween()
-		tween.set_loops()
-		tween.tween_property(root, "position:y", pos.y + 0.08, 0.8).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		tween.tween_property(root, "position:y", pos.y, 0.8).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		return true
 	else:
 		root.queue_free()
 		return false
+
+func spawn_full_squad_from_server(members: Array) -> void:
+	clear_battle()
+	var positions := [Vector3(-4,0,-1.5), Vector3(-4,0,0), Vector3(-4,0,1.5), Vector3(-2.5,0,-1), Vector3(-2.5,0,1), Vector3(-3,0,0)]
+	for i in range(members.size()):
+		var m: Dictionary = members[i] as Dictionary
+		var cls: String = str(m.get("class","warrior"))
+		var gender: String = str(m.get("gender","male"))
+		var gshort := "m" if gender=="male" else "f"
+		var pos: Vector3 = positions[i] if i < positions.size() else Vector3(-3,0,0)
+		var ok := _try_spawn_glb(i, cls, gshort, pos, 1, 0)
+		if not ok:
+			spawn_character(i, cls, gender, pos, 1, 0)
 
 func spawn_character(index: int, char_class: String, gender: String, pos: Vector3, tier_wings: int = 1, stars_wings: int = 0) -> Node3D:
 	var root := Node3D.new()
