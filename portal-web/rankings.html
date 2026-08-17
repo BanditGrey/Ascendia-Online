@@ -1,0 +1,10 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><title>Rankings — Ascendia</title><style>body{background:#0a0a0f;color:#e8e8ea;font:14px system-ui;margin:0}header{padding:16px 24px;border-bottom:1px solid #252538} .card{background:#16161f;border:1px solid #252538;border-radius:12px;padding:16px;margin:16px;max-width:800px}</style></head><body>
+<header><b>Rankings</b> — Power / Torre / Arena — <a href="index.html" style="color:#ffcc33">Portal</a></header>
+<div class="card"><h3>Power</h3><pre id="power">Carregando...</pre></div>
+<div class="card"><h3>Torre</h3><pre id="tower">...</pre></div>
+<div class="card"><h3>Arena</h3><pre id="arena">...</pre></div>
+<script>
+async function load(p,id){let r=await fetch(p).then(x=>x.json());document.getElementById(id).textContent=JSON.stringify(r,null,2)}
+load("/api/v1/rankings/power?limit=10","power");load("/api/v1/tower/ranking","tower");load("/api/v1/arena/ranking","arena");
+</script>
+</body></html>
