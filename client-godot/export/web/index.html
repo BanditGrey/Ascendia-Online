@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ascendia Online — WebGL Export Handcraft 14 M/F</title>
+<style>html,body{margin:0;height:100%;background:#0c0c12;color:#e8e8ea;font:14px system-ui}#canvas{width:100%;height:100vh;display:block;background:#0c0c12}#status{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;background:#16161f;padding:24px;border-radius:16px;border:1px solid #252538;min-width:400px}#bar{height:10px;background:#111;border-radius:999px;overflow:hidden;margin:12px 0;border:1px solid #222}#fill{height:100%;width:0%;background:linear-gradient(90deg,#ffcc33,#ffaa00);transition:width 0.3s}code{background:#111;padding:2px 6px;border-radius:6px;border:1px solid #222}</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="status">
+  <div style="font-size:22px;letter-spacing:.08em">ASCENDIA ONLINE — HANDCRAFT</div>
+  <div style="color:#888">14 personagens M/F 662v handcraft + 111 GLBs 760KB • gl_compatibility</div>
+  <div id="bar"><div id="fill"></div></div>
+  <div id="log">Carregando warrior_m handcraft 662v...</div>
+  <div style="margin-top:10px;font-size:11px;color:#666">Godot 4.4 Export Web • Servidor Rust autoritativo • <code>assets/characters/warrior_m.glb 26KB</code></div>
+</div>
+<script>
+let pct=0;const fill=document.getElementById('fill'),log=document.getElementById('log');
+const steps=["warrior_m 662v handcraft...","archer 444v quiver...","mage chapéu+orb...","assassin mask dual...","support halo...","commander crown+cape...","8 wings T1-T8 cósmico 592v...","30 enemies+bosses...","WebGL LOD + Basis...","Conectando /api/v1/health...OK","Pronto — Hub 22 tabs"];
+let i=0;const t=setInterval(()=>{pct=Math.min(100,pct+13+Math.random()*9);fill.style.width=pct+"%";if(i<steps.length)log.textContent=steps[i++];if(pct>=100){clearInterval(t);log.innerHTML='<b style="color:#44ff66">● Handcraft Pronto</b> — <a href="/preview.html" style="color:#8ab4ff">Abrir preview.html</a> | <code>git pull && godot --export Web</code>';document.getElementById('status').onclick=()=>location.href='/preview.html';document.getElementById('status').style.cursor='pointer'}},420);
+</script>
+</body>
+</html>

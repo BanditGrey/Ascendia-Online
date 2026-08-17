@@ -1,0 +1,120 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ilhas — Ascendia</title>
+<style>:root{--bg:#0a1620;--card:#111f2e;--line:#1e3347;--accent:#4dd0e1;--accent2:#ffcc33;--text:#e0f7fa;--muted:#8ab4c0}*{box-sizing:border-box}body{margin:0;background:radial-gradient(900px 500px at 50% 0%, #0e2a3a 0%, #0a1620 65%);color:var(--text);font:14px system-ui}header{padding:16px 24px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;backdrop-filter:blur(8px);background:rgba(10,22,32,.85)}header a{color:var(--text);text-decoration:none;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:12px}.tabs{max-width:1100px;margin:16px auto 0;padding:0 24px;display:flex;gap:8px}.tab{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:13px}.tab.active{background:var(--accent);color:#0a1620;border-color:var(--accent);font-weight:700}.tab.gold.active{background:var(--accent2);color:#111;border-color:var(--accent2)}.hero{max-width:1100px;margin:16px auto;padding:0 24px;display:grid;grid-template-columns:1.1fr .9fr;gap:24px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}.btn{display:inline-block;padding:10px 16px;border-radius:999px;background:var(--accent);color:#0a1620;font-weight:700;text-decoration:none;border:1px solid var(--accent);cursor:pointer}.btn.gold{background:var(--accent2);color:#111;border-color:var(--accent2)}.grid{max-width:1100px;margin:16px auto;padding:0 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}code{background:#0f1f2e;padding:2px 6px;border-radius:6px;border:1px solid var(--line);font-size:12px}pre{background:#0f1f2e;padding:12px;border-radius:8px;border:1px solid var(--line);overflow:auto}</style>
+</head><body>
+<header><b>🏝️ Ilhas Pós-500</b> <a href="index.html">Portal</a> <a href="https://8002-i26fgc5pp3omxssa0zcnx.e2b.app/portal/index.html" target="_blank">Jogar</a> <span style="margin-left:auto;color:var(--muted)">6 ilhas • 501-800 • 18 mobs + 2 Leviatãs</span></header>
+<div class="tabs">
+  <div class="tab active" id="tab11" onclick="show(11)">Ilha 11 — Abismo 501-550</div>
+  <div class="tab gold" id="tab12" onclick="show(12)">Ilha 12 — Reino Dourado 551-600 👑</div>
+  <div class="tab" id="tab13" onclick="show(13)" style="border-color:#6a4cff">Ilha 13 — Vazio Estelar 601-650 ✨</div>
+  <div class="tab" id="tab14" onclick="show(14)" style="border-color:#ff4444">Ilha 14 — Eclipse 651-700 🌑</div>
+  <div class="tab" id="tab15" onclick="show(15)" style="border-color:#60a5fa">Ilha 15 — Tempestade 701-750 ⛈️</div>
+  <div class="tab" id="tab16" onclick="show(16)" style="border-color:#a78bfa">Ilha 16 — Tempo 751-800 ⏳</div>
+</div>
+<div id="ilha11">
+<div class="hero">
+  <div>
+    <div style="display:inline-block;padding:4px 8px;border-radius:999px;background:#0f2a3a;border:1px solid #1e4a5a;font-size:11px">ABISMO • 3 MOBS + LEVIATÃ 550</div>
+    <h2 style="font-size:26px;margin:12px 0 8px">Abismo aquático bioluminescente</h2>
+    <p style="color:var(--muted)">Requer <code>Fase 500</code> + <code>5000 Gold</code>. Mobs <code>abyssal_horror</code> <code>deep_one</code> <code>leviathan_spawn</code> — Boss <b>Leviatã Ancião 550</b> — Loot <code>Lâmina Abissal</code> <code>Coração do Abismo</code> <code>Coroa do Leviatã</code></p>
+    <div style="display:flex;gap:12px;margin-top:16px"><a class="btn" href="#" onclick="unlock('abyss_island');return false">🔓 Desbloquear 5000 Gold</a><a class="btn" style="background:transparent;color:var(--text)" href="#" onclick="enter(501);return false">⚔️ Entrar 501</a></div>
+    <pre id="status11">Carregando...</pre>
+  </div>
+  <div class="card"><h3 style="color:var(--accent)">Requisitos Abismo</h3><div id="req11">Verificando...</div><div style="margin-top:12px;font-size:11px;color:var(--muted)">Corais 3 variações 2.6KB • GLB bioluminescente</div></div>
+</div>
+<div class="grid"><div class="card"><h3>👾 Mobs 11</h3><p style="color:var(--muted)">abyssal_horror 7.4KB<br>deep_one 6.0KB<br>leviathan_spawn 8.3KB</p></div><div class="card"><h3>👑 Boss 550</h3><p style="color:var(--muted)">Leviatã 2.3KB + 2 barbatanas + 2 chifres</p></div><div class="card"><h3>🎁 Skins 11</h3><p style="color:var(--muted)">Asas Abissais, Leviatã, Kraken — tradáveis</p></div></div>
+</div>
+<div id="ilha12" style="display:none">
+<div class="hero">
+  <div>
+    <div style="display:inline-block;padding:4px 8px;border-radius:999px;background:#2a1f0a;border:1px solid #5a4a1a;font-size:11px">REINO DOURADO • 3 MOBS + REI 600 • VIP 5</div>
+    <h2 style="font-size:26px;margin:12px 0 8px;color:var(--accent2)">Reino Dourado flutuante</h2>
+    <p style="color:var(--muted)">Requer <code>Ilha 11 + Fase 550 + 8000 Gold + VIP 5</code>. Mobs <code>golden_golem</code> <code>treasure_mimic</code> <code>golden_phoenix</code> — Boss <b style="color:var(--accent2)">Rei Dourado 600</b> — Loot <code>Lâmina Dourada</code> <code>Armadura do Rei</code> <code>Coroa Dourada Suprema</code> <span style="color:var(--accent2)">Primordial</span></p>
+    <div style="display:flex;gap:12px;margin-top:16px"><a class="btn gold" href="#" onclick="unlock('golden_kingdom');return false">🔓 Desbloquear 8000 Gold + VIP5</a><a class="btn" style="background:transparent;color:var(--text)" href="#" onclick="enter(551);return false">⚔️ Entrar 551</a></div>
+    <pre id="status12">Carregando...</pre>
+  </div>
+  <div class="card" style="border-color:#5a4a1a"><h3 style="color:var(--accent2)">Requisitos Dourado</h3><div id="req12">Verificando...</div><div style="margin-top:12px;font-size:11px;color:var(--muted)">Pilares dourados 3 variações 1.7KB • Templo flutuante</div></div>
+</div>
+<div id="ilha13" style="display:none">
+<div class="hero">
+  <div>
+    <div style="display:inline-block;padding:4px 8px;border-radius:999px;background:#1a0f2e;border:1px solid #4a2a7a;font-size:11px">VAZIO ESTELAR • 3 MOBS + VAZIO 650 • VIP 8</div>
+    <h2 style="font-size:26px;margin:12px 0 8px;color:#a78bfa">Vazio estelar com cristais</h2>
+    <p style="color:var(--muted)">Requer <code>Reino Dourado + Fase 600 + 12000 Gold + VIP 8</code>. Mobs <code>void_horror</code> <code>star_wraith</code> <code>void_spawn</code> — Boss <b style="color:#a78bfa">Vazio Estelar 650</b> — Loot <code>Lâmina do Vazio</code> <code>Armadura Estelar</code> <code>Coroa do Vazio</code></p>
+    <div style="display:flex;gap:12px;margin-top:16px"><a class="btn" style="background:#6a4cff;border-color:#6a4cff" href="#" onclick="unlock('void_star');return false">🔓 Desbloquear 12000 Gold + VIP8</a><a class="btn" style="background:transparent;color:var(--text)" href="#" onclick="enter(601);return false">⚔️ Entrar 601</a></div>
+    <pre id="status13">Carregando...</pre>
+  </div>
+  <div class="card" style="border-color:#4a2a7a"><h3 style="color:#a78bfa">Requisitos Vazio</h3><div id="req13">Verificando...</div></div>
+</div>
+<div class="grid"><div class="card"><h3>👾 Mobs 13</h3><p style="color:var(--muted)">void_horror 8.9KB<br>star_wraith 7.6KB<br>void_spawn 9.9KB</p></div><div class="card"><h3>👑 Boss 650</h3><p style="color:var(--muted)">Vazio Estelar 6 spikes estelares</p></div><div class="card"><h3>🎁 Skins 13</h3><p style="color:var(--muted)">Asas do Vazio, Aura do Vazio</p></div></div>
+</div>
+<div class="grid"><div class="card"><h3>👾 Mobs 12</h3><p style="color:var(--muted)">golden_golem 4.4KB<br>treasure_mimic 4.4KB<br>golden_phoenix 6.3KB asas</p></div><div class="card"><h3>👑 Boss 600</h3><p style="color:var(--muted)">Rei Dourado 2.0KB cape vermelha + crown ouro</p></div><div class="card"><h3>🎁 Skins 12</h3><p style="color:var(--muted)">Asas Douradas, Fênix Dourada, Frame Dourado</p></div></div>
+</div>
+<script>
+function show(n){document.getElementById('ilha11').style.display=n==11?'block':'none';document.getElementById('ilha12').style.display=n==12?'block':'none';document.getElementById('ilha13').style.display=n==13?'block':'none';document.getElementById('ilha14').style.display=n==14?'block':'none';document.getElementById('ilha15').style.display=n==15?'block':'none';document.getElementById('ilha16').style.display=n==16?'block':'none';document.getElementById('tab11').classList.toggle('active',n==11);document.getElementById('tab12').classList.toggle('active',n==12);document.getElementById('tab13').classList.toggle('active',n==13);document.getElementById('tab14').classList.toggle('active',n==14);document.getElementById('tab15').classList.toggle('active',n==15);document.getElementById('tab16').classList.toggle('active',n==16)}
+async function api(p,opts={}){let t=localStorage.getItem("mock_token");if(t)opts.headers={...(opts.headers||{}),Authorization:"Bearer "+t,"Content-Type":"application/json"};let r=await fetch(p,opts);return r.json()}
+async function load(){
+  let s=await fetch("/api/v1/island/status",{headers:{Authorization:"Bearer "+(localStorage.getItem("mock_token")||"mock")}}).then(r=>r.json()).catch(()=>[]);
+  let list=Array.isArray(s)?s:[s];
+  let abyss=list.find(x=>x.island=="abyss_island")||list[0]||{};
+  let gold=list.find(x=>x.island=="golden_kingdom")||{};
+  let void_star=list.find(x=>x.island=="void_star")||{};
+  let eclipse=list.find(x=>x.island=="eclipse")||{};
+  let storm=list.find(x=>x.island=="storm")||{};
+  let time_labyrinth=list.find(x=>x.island=="time_labyrinth")||{};
+  document.getElementById("status11").textContent=JSON.stringify(abyss,null,2);
+  document.getElementById("req11").innerHTML=`Fase ${abyss.max_stage||0}/500 — Gold ${abyss.gold||0}/5000 — ${abyss.can_unlock?"<b style='color:#4dd0e1'>Pronto</b>":abyss.unlocked?"Desbloqueado 501":"Bloqueado"}`;
+  document.getElementById("status12").textContent=JSON.stringify(gold,null,2);
+  document.getElementById("req12").innerHTML=`Fase ${gold.max_stage||0}/550 — Gold ${gold.gold||0}/8000 — VIP ${gold.vip||0}/5 — ${gold.can_unlock?"<b style='color:#ffcc33'>Pronto</b>":gold.unlocked?"Desbloqueado 551":"Bloqueado (precisa Abismo)"}`;
+  document.getElementById("status13").textContent=JSON.stringify(void_star,null,2);
+  document.getElementById("req13").innerHTML=`Fase ${void_star.max_stage||0}/600 — Gold ${void_star.gold||0}/12000 — VIP ${void_star.vip||0}/8 — ${void_star.can_unlock?"<b style='color:#a78bfa'>Pronto</b>":void_star.unlocked?"Desbloqueado 601":"Bloqueado (precisa Dourado)"}`;
+  document.getElementById("status14").textContent=JSON.stringify(eclipse,null,2);
+  document.getElementById("req14").innerHTML=`Fase ${eclipse.max_stage||0}/650 — Gold ${eclipse.gold||0}/15000 — VIP ${eclipse.vip||0}/10 — ${eclipse.can_unlock?"<b style='color:#ff4444'>Pronto</b>":eclipse.unlocked?"Desbloqueado 651":"Bloqueado (precisa Vazio)"}`;
+  document.getElementById("status15").textContent=JSON.stringify(storm,null,2);
+  document.getElementById("req15").innerHTML=`Fase ${storm.max_stage||0}/700 — Gold ${storm.gold||0}/18000 — VIP ${storm.vip||0}/12 — ${storm.can_unlock?"<b style='color:#60a5fa'>Pronto</b>":storm.unlocked?"Desbloqueado 701":"Bloqueado (precisa Eclipse)"}`;
+  document.getElementById("status16").textContent=JSON.stringify(time_labyrinth,null,2);
+  document.getElementById("req16").innerHTML=`Fase ${time_labyrinth.max_stage||0}/750 — Gold ${time_labyrinth.gold||0}/22000 — VIP ${time_labyrinth.vip||0}/13 — ${time_labyrinth.can_unlock?"<b style='color:#a78bfa'>Pronto</b>":time_labyrinth.unlocked?"Desbloqueado 751":"Bloqueado (precisa Tempestade)"}`;
+}
+async function unlock(code){let r=await api("/api/v1/island/unlock/"+code,{method:"POST"});alert(JSON.stringify(r));load()}
+async function enter(stage){let r=await api("/api/v1/island/enter/"+stage,{method:"POST"});alert(JSON.stringify(r))}
+load()
+</script>
+<div id="ilha14" style="display:none">
+<div class="hero">
+  <div>
+    <div style="display:inline-block;padding:4px 8px;border-radius:999px;background:#1a0f0f;border:1px solid #5a1a1a;font-size:11px">ECLIPSE ETERNO • 3 MOBS + ECLIPSE 700 • VIP 10 + DESPERTAR 1</div>
+    <h2 style="font-size:26px;margin:12px 0 8px;color:#ff4444">Eclipse eterno com obeliscos</h2>
+    <p style="color:var(--muted)">Requer <code>Vazio 650 + Fase 650 + 15000 Gold + VIP 10 + Despertar 1</code>. Mobs <code>eclipse_horror</code> <code>eclipse_wraith</code> <code>eclipse_spawn</code> — Boss <b style="color:#ff4444">Eclipse Eterno 700</b> — Loot <code>Lâmina do Eclipse</code> <code>Armadura do Eclipse</code> <code>Coroa do Eclipse Eterno</code></p>
+    <div style="display:flex;gap:12px;margin-top:16px"><a class="btn" style="background:#ff4444;border-color:#ff4444" href="#" onclick="unlock('eclipse');return false">🔓 Desbloquear 15000 Gold + VIP10</a><a class="btn" style="background:transparent;color:var(--text)" href="#" onclick="enter(651);return false">⚔️ Entrar 651</a></div>
+    <pre id="status14">Carregando...</pre>
+  </div>
+  <div class="card" style="border-color:#5a1a1a"><h3 style="color:#ff4444">Requisitos Eclipse</h3><div id="req14">Verificando...</div></div>
+</div>
+<div class="grid"><div class="card"><h3>👾 Mobs 14</h3><p style="color:var(--muted)">eclipse_horror 7.4KB<br>eclipse_wraith 6.0KB<br>eclipse_spawn 8.3KB</p></div><div class="card"><h3>👑 Boss 700</h3><p style="color:var(--muted)">Eclipse Eterno anel + obeliscos</p></div><div class="card"><h3>🎁 Skins 14</h3><p style="color:var(--muted)">Asas do Eclipse, Aura do Eclipse</p></div></div>
+</div>
+
+<div id="ilha15" style="display:none">
+<div class="hero">
+  <div>
+    <div style="display:inline-block;padding:4px 8px;border-radius:999px;background:#0f1a2e;border:1px solid #2a3a5a;font-size:11px">TEMPESTADE • 3 MOBS + TEMPESTADE 750 • VIP 12</div>
+    <h2 style="font-size:26px;margin:12px 0 8px;color:#60a5fa">Tempestade eterna com raios</h2>
+    <p style="color:var(--muted)">Requer <code>Eclipse 700 + Fase 700 + 18000 Gold + VIP 12 + Despertar 2</code>. Mobs <code>storm_horror</code> <code>thunder_wraith</code> <code>storm_spawn</code> — Boss <b style="color:#60a5fa">Tempestade 750</b></p>
+    <div style="display:flex;gap:12px;margin-top:16px"><a class="btn" style="background:#60a5fa;border-color:#60a5fa" href="#" onclick="unlock('storm');return false">🔓 Desbloquear 18000 Gold + VIP12</a><a class="btn" style="background:transparent;color:var(--text)" href="#" onclick="enter(701);return false">⚔️ Entrar 701</a></div>
+    <pre id="status15">Carregando...</pre>
+  </div>
+  <div class="card" style="border-color:#2a3a5a"><h3 style="color:#60a5fa">Requisitos Tempestade</h3><div id="req15">Verificando...</div></div>
+</div>
+</div>
+<div id="ilha16" style="display:none">
+<div class="hero">
+  <div>
+    <div style="display:inline-block;padding:4px 8px;border-radius:999px;background:#1a1a2e;border:1px solid #4a4a8a;font-size:11px">LABIRINTO DO TEMPO • 3 MOBS + TEMPO 800 • VIP 13</div>
+    <h2 style="font-size:26px;margin:12px 0 8px;color:#a78bfa">Labirinto temporal com relógios</h2>
+    <p style="color:var(--muted)">Requer <code>Tempestade 750 + Fase 750 + 22000 Gold + VIP 13 + Despertar 3</code>. Mobs <code>time_horror</code> <code>chrono_wraith</code> <code>time_spawn</code> — Boss <b style="color:#a78bfa">Tempo Eterno 800</b></p>
+    <div style="display:flex;gap:12px;margin-top:16px"><a class="btn" style="background:#a78bfa;border-color:#a78bfa" href="#" onclick="unlock('time_labyrinth');return false">🔓 Desbloquear 22000 Gold + VIP13</a><a class="btn" style="background:transparent;color:var(--text)" href="#" onclick="enter(751);return false">⚔️ Entrar 751</a></div>
+    <pre id="status16">Carregando...</pre>
+  </div>
+  <div class="card" style="border-color:#4a4a8a"><h3 style="color:#a78bfa">Requisitos Tempo</h3><div id="req16">Verificando...</div></div>
+</div>
+</div>
+</body>
+</body></html>

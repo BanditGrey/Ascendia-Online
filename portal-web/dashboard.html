@@ -1,0 +1,43 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboard — Ascendia</title>
+<style>:root{--bg:#0a0a0f;--card:#16161f;--line:#252538;--accent:#ffcc33;--text:#e8e8ea;--muted:#9aa0a6}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px system-ui}header{padding:16px 24px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center}header a{color:var(--text);text-decoration:none;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:16px}pre{background:#0f0f16;padding:12px;border-radius:8px;border:1px solid var(--line);overflow:auto;font-size:12px}</style>
+</head><body>
+<header><b>ASCENDIA</b> Dashboard <a href="index.html">Portal</a> <a href="https://8002-i26fgc5pp3omxssa0zcnx.e2b.app/" target="_blank">Jogar</a> <span style="margin-left:auto;color:var(--muted)">Mock API 8001</span></header>
+<div style="max-width:1000px;margin:0 auto;padding:16px">
+<div id="user" class="card">Carregando...</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div class="card"><h3>Personagem</h3><pre id="chars">...</pre><button onclick="createChar()">Recrutar Guerreiro Lv5</button></div>
+<div class="card"><h3>Inventário</h3><pre id="inv">...</pre><button onclick="enhance()">Enhance +</button></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div class="card"><h3>Cosméticos 8</h3><pre id="cos">...</pre><button onclick="upgrade()">Evoluir Asas</button></div>
+<div class="card"><h3>VIP / Pass</h3><pre id="vip">...</pre><button onclick="grantVip()">Grant +500 VIP</button></div>
+</div>
+<div class="card"><h3>Logs</h3><pre id="log"></pre></div>
+</div>
+<script>
+const API=""; // relativo ao mock 8001 (mesma origem se servir portal via 8001)
+async function j(p,opts={}){opts.headers={...(opts.headers||{}),"Content-Type":"application/json"};let r=await fetch(p,opts);return r.json()}
+let token=localStorage.getItem("mock_token");
+async function ensureAuth(){
+  if(!token){
+    let r=await j("/api/v1/auth/register",{method:"POST",body:JSON.stringify({email:"dash_"+Math.random().toString(36).slice(2,8)+"@test.com",display_name:"DashHero",password:"senha-segura-123",gender:"male"})});
+    token=r.access_token; localStorage.setItem("mock_token",token)
+  }
+}
+function authHeaders(){return {Authorization:"Bearer "+token}}
+async function load(){
+  await ensureAuth();
+  document.getElementById("user").textContent="Mock token "+token.slice(0,16)+"...";
+  let c=await fetch("/api/v1/characters",{headers:authHeaders()}).then(r=>r.json()).catch(()=>[]); document.getElementById("chars").textContent=JSON.stringify(c,null,2);
+  let inv=await fetch("/api/v1/inventory",{headers:authHeaders()}).then(r=>r.json()).catch(()=>({})); document.getElementById("inv").textContent=JSON.stringify(inv,null,2);
+  let cos=await fetch("/api/v1/cosmetics",{headers:authHeaders()}).then(r=>r.json()).catch(()=>[]); document.getElementById("cos").textContent=JSON.stringify(cos,null,2);
+  let vip=await fetch("/api/v1/vip/status",{headers:authHeaders()}).then(r=>r.json()).catch(()=>({})); document.getElementById("vip").textContent=JSON.stringify(vip,null,2);
+}
+async function createChar(){let r=await j("/api/v1/characters",{method:"POST",headers:authHeaders(),body:JSON.stringify({name:"Guerreiro"+Math.floor(Math.random()*100),gender:"male",class:"warrior",subclass:"guardian"})});log(JSON.stringify(r));load()}
+async function enhance(){let inv=await fetch("/api/v1/inventory",{headers:authHeaders()}).then(r=>r.json());let id=inv.items?.[0]?.id;if(!id)return;let r=await j("/api/v1/inventory/enhance",{method:"POST",headers:authHeaders(),body:JSON.stringify({item_id:id})});log(JSON.stringify(r))}
+async function upgrade(){let r=await j("/api/v1/cosmetics/upgrade",{method:"POST",headers:authHeaders(),body:JSON.stringify({cosmetic_type:"wings"})});log(JSON.stringify(r));load()}
+async function grantVip(){let r=await j("/api/v1/vip/grant",{method:"POST",headers:authHeaders(),body:JSON.stringify({points:500})});log(JSON.stringify(r));load()}
+function log(m){document.getElementById("log").textContent=m+"\n"+document.getElementById("log").textContent}
+load()
+</script>
+</body></html>

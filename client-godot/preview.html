@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ascendia Online — Fase 2 Preview</title>
+<style>
+  :root{--bg:#0c0c12;--card:#16161f;--accent:#ffcc33;--text:#e8e8ea;--muted:#9aa0a6;--line:#252538}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,Segoe UI,Roboto}
+  header{padding:28px 24px;text-align:center;border-bottom:1px solid var(--line)}
+  header h1{margin:0;font-size:28px;letter-spacing:.08em} header p{color:var(--muted);margin:6px 0}
+  .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;max-width:1180px;margin:24px auto;padding:0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+  .card h3{margin:0 0 8px;font-size:15px;color:var(--accent)}
+  .badge{display:inline-block;background:#252538;border:1px solid #333;padding:4px 8px;border-radius:999px;font-size:11px;color:#aab}
+  .scene{aspect-ratio:16/9;background:radial-gradient(600px 300px at 50% 0%, #1a2440 0%, #0f1420 45%, #0c0c12 100%);border-radius:12px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;border:1px solid var(--line)}
+  .squad{position:absolute;left:14%;display:flex;gap:10px;align-items:flex-end}
+  .char{width:46px;height:70px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:16px;box-shadow:0 6px 16px rgba(0,0,0,.5);animation:bob 1.6s ease-in-out infinite alternate;border:1px solid rgba(255,255,255,.08)}
+  .char small{font-size:9px;opacity:.8}
+  .char.warrior{background:linear-gradient(#ff4444,#8b1111)} .char.archer{background:linear-gradient(#44bb66,#1a5a2a)} .char.commander{background:linear-gradient(#ffdd55,#aa7700)} .char.mage{background:linear-gradient(#4d7cff,#1a2a8a)} .char.assassin{background:linear-gradient(#a855f7,#3b0f6e)} .char.support{background:linear-gradient(#facc15,#854d0e)}
+  @keyframes bob{from{transform:translateY(0)}to{transform:translateY(-8px)}}
+  .enemy{position:absolute;right:14%;display:flex;gap:10px;align-items:center}
+  .mob{width:52px;height:52px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;border:1px solid rgba(255,255,255,.1)}
+  .mob.slime{background:#2ecc71} .mob.goblin{background:#7a9a5a} .mob.wolf{background:#8a8a96} .mob.troll{background:#8d6a4a;scale:1.15;border:2px solid var(--accent)} .mob.scorpion{background:#e67e22} .mob.yeti{background:#ecf0f1;color:#2c3e50} .mob.titan{background:linear-gradient(#f1c40f,#d35400);scale:1.25;border:2px solid #ffd700}
+  .hud{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;font-size:11px}
+  .bar{height:8px;background:#111;border-radius:999px;overflow:hidden;width:120px;border:1px solid #222}
+  .fill{height:100%;background:linear-gradient(90deg,#44ff66,#22aa44);width:72%} .fill.low{background:linear-gradient(90deg,#ff4444,#cc1111);width:34%}
+  code{background:#0f0f16;padding:2px 6px;border-radius:6px;font-size:12px;border:1px solid #222}
+  a{color:#8ab4ff}
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  pre{margin:0;white-space:pre-wrap;word-break:break-word;background:#0f0f16;padding:12px;border-radius:10px;border:1px solid #222;font-size:12px;line-height:1.45}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+  .chip{padding:4px 8px;border-radius:999px;background:#1e1e2a;border:1px solid #2a2a3a;font-size:11px}
+  .chip.active{background:var(--accent);color:#111;border-color:#ffcc33;font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <div class="badge">FASE 2 — EXPANSÃO • Godot 4 WebGL + Rust Autoritativo • 1-500 • 10 Capítulos</div>
+  <h1>ASCENDIA ONLINE</h1>
+  <p>Rise. Evolve. Dominate. — 3D Idle Squad Battle RPG • Cartoon 3D • 6 Classes • 8 Cosméticos • VIP 15 • Battle Pass • Guilda • Marketplace</p>
+  <p><code>Rust Actix 4 + PostgreSQL 16 + Redis 7 — Cliente apenas renderiza (server-authoritative)</code></p>
+  <div class="chips" style="justify-content:center">
+    <span class="chip active">Cap.1 Floresta 1-50</span><span class="chip">Cap.2 Deserto 51-100</span><span class="chip">Cap.3 Gelo 101-150</span><span class="chip">Cap.4 Vulcão 151-200</span><span class="chip">Cap.5 Pântano 201-250</span><span class="chip">Cap.6 Ruínas 251-300</span><span class="chip">Cap.7 Abismo 301-350</span><span class="chip">Cap.8 Celestial 351-400</span><span class="chip">Cap.9 Caos 401-450</span><span class="chip">Cap.10 Primordial 451-500</span>
+  </div>
+</header>
+
+<div class="grid">
+  <div class="card">
+    <h3>🎮 Preview 3D — 10 Capítulos • 3 Waves + Boss a cada 10 + Boss Capítulo a cada 50</h3>
+    <div class="scene" id="scene">
+      <div class="hud">
+        <div><div>Wave <span id="waveNum">2</span>/3 • <span id="enemyName">Goblin ×2</span> <span class="badge">Squad vs Wave</span></div><div class="bar"><div class="fill" id="hpSquad"></div></div></div>
+        <div style="text-align:right"><div>Fase <span id="stageNum">87</span> — <span id="chapterName">Deserto</span> • <span id="diffName">Inferno</span> • Seed auditável</div><div class="bar"><div class="fill low" id="hpEnemy"></div></div></div>
+      </div>
+      <div class="squad" id="squad">
+        <div class="char commander"><span>👑</span><small>Comand.</small></div>
+        <div class="char warrior"><span>🛡️</span><small>Guerreiro</small></div>
+        <div class="char mage"><span>🔮</span><small>Mago</small></div>
+        <div class="char assassin"><span>⚔️</span><small>Assassino</small></div>
+      </div>
+      <div class="enemy" id="enemy"></div>
+      <div style="position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);padding:6px 10px;border-radius:999px;font-size:11px">Auto-attack • Skills cooldown • Agro por role • DOT/HOT • Crit/Dodge/PEN • Sinergias</div>
+    </div>
+    <p style="color:var(--muted);font-size:12px">Seis classes M/F com 3 subclasses cada: Comandante (Imperador/Guerra/Estrategista), Guerreiro (Guardião/Berserker/Paladino), Arqueiro (Atirador/Balestreiro/Ranger), Mago (Elementalista/Necromante/Arcano), Assassino (Sombra/Ninja/Lâmina Dupla), Suporte (Curandeiro/Buffador/Xamã). Spawn e asas como nós filhos com partículas por ★.</p>
+    <div class="cols2">
+      <div><b>Slots Squad</b><br><code>1 Líder 2 Lv5 3 Lv15 4 Lv35 5 Lv55 6 Lv80</code><br><span style="color:var(--muted)">Sinergia 2× Guerreiro +10% HP, 2× Arqueiro +5% Crit (server-side). Formações balanced/vanguard/assault.</span></div>
+      <div><b>Capítulos & Bosses</b><br><code>Troll Ancestral 50 → Faraó 100 → Rei Inverno 150 → Senhor Inferno 200 → Rainha Hidra 250 → Guardião 300 → Senhor Sombras 350 → Arcanjo 400 → Avatar Caos 450 → O Criador 500</code></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>⚙️ Fluxo Autoritativo — 10 Capítulos (1-500)</h3>
+<pre>> POST /api/v1/combat/start  {stage:87,difficulty:"inferno"}
+&lt; 200 {victory:true, stars:3, gold:387, xp:276, seed:0xA5CE..., 
+  events:[{wave:1,enemy:"scorpion",count:3},{wave:2,enemy:"mummy",count:2},
+           {wave:3,enemy:"farao_imortal",count:1,cleared:true}]}
+# Drops: raridade com Luck+difficulty, cap por fase, trade lock 24h
+# Fragmentos: 8 tipos ×3-6 por vitória + 1-5 essências em boss×10
+# Upgrade: ★0→★1 10 ... ★9→★10 100 (550/tier), Tier up: T1→T2 1 ess+50 ...
+# Battle Pass: +10+stage/10 XP por fase, +40 boss, level=XP/1000 max50
+
+> GET /api/v1/characters  | POST {name,gender,class,mage,subclass:"arcano"}
+  unlock: warrior5 archer15 mage25 assassin38 support55
+> GET /api/v1/cosmetics (8 tipos) → POST /cosmetics/upgrade {wings|mount|pet|aura|mask|trail|hit_effect|frame}
+> GET /api/v1/vip/status → POST /vip/grant {points:500}
+> GET /battle-pass → POST /battle-pass/premium (500 💎) → POST /battle-pass/claim {level:5}
+> POST /guilds {name:"Ordem"} (1000 Gold Lv20) | GET /guilds | POST /guilds/join
+> GET /marketplace → POST {inventory_item_id,price_diamonds:100} (taxa 10%, 20/50 slots VIP)</pre>
+    <p><a href="/health">→ /health</a> • <a href="/api/v1/battle-pass">/battle-pass</a> • <a href="/api/v1/vip/status">/vip/status</a> • <a href="../docs/HANDOFF.md">HANDOFF.md</a></p>
+    <h3>🪶 8 Cosméticos Universais (Líder)</h3>
+<pre>🪶 Asas T1-8 (+ATK/CRIT)  🐴 Mount T1-8 (-clear +SPD/DEF)  🐾 Pet (+Luck/Utility)
+💫 Aura (+DEF/HP)  🎭 Mask (+CRIT/PEN)  ✨ Trail (+Dodge/SPD)  💥 Hit (+DMG proc)  🌀 Frame (+EXP/Drop)
+★0-2 base  ★3-5 partículas  ★6-8 glow  ★9-10 aura cósmica
+Stats globais: só Líder evolui, squad recebe. Skins 4-6/tier tradáveis (VIP não).
+</pre>
+  </div>
+</div>
+
+<div class="grid" style="grid-template-columns:1fr">
+  <div class="card">
+    <h3>📦 Fase 2 — Entregue</h3>
+    <div class="cols2">
+<pre>Backend Rust ✅ (migração 0008)
+- character_class: +mage/assassin/support (+subclasses)
+- cosmetic_progress: 8 tipos ×T1-8, stages 1-500 (combat_sessions/stage_stars liberados)
+- vip_progress + battle_pass_seasons/progress + guilds/members + marketplace_listings
+- base_for_class: mage 900/190/60, assassin 1000/210/85, support 1100/90/110
+- waves: 10 capítulos com trash/boss específicos + scaling 0.045*stage+0.35*chapter
+- cosmetics.rs: 8 tipos, max 8, display_name, tier 8
+- inventory/stats: 8 bônus globais (wings ATK/CRIT, mount HP/DEF/SPD, pet Luck, aura DEF/HP, mask CRIT/PEN, trail Dodge, hit PEN, frame Luck)
+- combat 1-500 + 8 frags por vitória + essências + Battle Pass XP
+- vip.rs: thresholds 0-42000, benefícios 0-15, grant idempotente
+- battle_pass.rs: 50 níveis, recompensas 1/5/10...50 (Premium 500💎)
+- guild.rs: 30→50 membros, 1000 Gold Lv20, roles leader/vice/officer/member/recruit
+- marketplace.rs: Diamantes, taxa 10%, 20/50 slots, trade lock 24h
+- main.rs: /vip/status|/grant, /battle-pass, /guilds, /marketplace registrados
+- itens capítulo 2-10 (10 templates tier2-8)</pre>
+<pre>Frontend Godot 4 ✅
+- project.godot 500, Api.gd +vip/pass/guild/market, Hub 6 classes
+- Hub.tscn: header +Vip/Pass/Guild/Market, Stage 1-500 + ChapterLabel, RecruitRow2 (Mage/Assassin/Support), Cosmetics 8 botões (2 linhas), Tabs Vip/Pass/Guilda/Marketplace
+- hub.gd 662 linhas: chapter_for/stage, _update_chapter_label, _load 8 cosméticos, _load_vip/pass/guild/market, _grant_vip, _activate_premium, _claim_pass, guild/market actions, 5 recruits, stage 500
+- combat_3d.gd: 10 capítulos — scorpion/mummy/yeti/ice_elemental/imp/fire/hydra/golem/shadow/fallen_angel/aberration/titan + bosses farao/rei/senhor/rainha/guardiao/arcanjo/avatar/criador com emissão e torus aura
+- cosmetics.gd: 8 tipos completos, preview.html atualizado para Fase 2
+- preview.html: 10 chips capítulos, squad 4 chars, rotação 10 waves, 500</pre>
+    </div>
+    <p style="color:var(--muted)">Próximo: skills/DOT/HOT/target por role, runas/sockets/sets/enchant, Torre/Dungeon/Arena/Raid/World Boss/Expedição, OAuth2/2FA, observabilidade, assets finais. Ver <code>docs/ROADMAP.md</code>.</p>
+  </div>
+</div>
+
+<script>
+const chapters=[
+  {stage:7, chapter:"Floresta", enemies:[{n:"slime",icon:"🟢"},{n:"goblin",icon:"👺"}]},
+  {stage:62, chapter:"Deserto", enemies:[{n:"scorpion",icon:"🦂"},{n:"mummy",icon:"🧟"}]},
+  {stage:127, chapter:"Gelo", enemies:[{n:"yeti",icon:"🧌"}]},
+  {stage:176, chapter:"Vulcão", enemies:[{n:"imp",icon:"👿"},{n:"fire_elemental",icon:"🔥"}]},
+  {stage:223, chapter:"Pântano", enemies:[{n:"hydra_spawn",icon:"🐍"}]},
+  {stage:287, chapter:"Ruínas", enemies:[{n:"golem",icon:"🗿"}]},
+  {stage:332, chapter:"Abismo", enemies:[{n:"shadow",icon:"🌑"},{n:"lich",icon:"💀"}]},
+  {stage:381, chapter:"Celestial", enemies:[{n:"fallen_angel",icon:"😇"}]},
+  {stage:434, chapter:"Caos", enemies:[{n:"aberration",icon:"👾"}]},
+  {stage:489, chapter:"Primordial", enemies:[{n:"titan",icon:"🦣"},{n:"primordial_dragon",icon:"🐉"}]},
+];
+let idx=0;
+function render(){
+  const ch=chapters[idx];
+  document.getElementById('stageNum').textContent=ch.stage;
+  document.getElementById('chapterName').textContent=ch.chapter;
+  document.getElementById('waveNum').textContent=(idx%3)+1;
+  document.getElementById('enemyName').textContent=ch.enemies.map(e=>e.n).join(" / ");
+  const enemyDiv=document.getElementById('enemy');
+  enemyDiv.innerHTML='';
+  ch.enemies.forEach(e=>{
+    const d=document.createElement('div');
+    d.className='mob '+e.n;
+    d.textContent=e.icon;
+    enemyDiv.appendChild(d);
+  });
+  document.getElementById('diffName').textContent=["Normal","Difícil","Inferno","Caos"][idx%4];
+  idx=(idx+1)%chapters.length;
+}
+render(); setInterval(render,2200);
+</script>
+</body>
+</html>

@@ -89,16 +89,66 @@ fn scaled_i64(values: &Value, key: &str, multiplier: f64) -> i64 {
     (number(values, key) * multiplier).round() as i64
 }
 
-/// Asas e montaria concedem bônus globais, aplicados após equipamentos e antes do Power Rating.
+/// 8 sistemas cosméticos concedem bônus globais (Líder) após equipamentos.
 fn apply_cosmetics(stats: &mut CalculatedStats, cosmetics: &[(String, i16, i16)]) {
     for (kind, tier, stars) in cosmetics {
-        let progress = i64::from(*tier - 1) * 10 + i64::from(*stars);
+        let progress = i64::from(*tier - 1) * 10 + i64::from(*stars); // 0..79
+        let tier_f = *tier as f64;
         match kind.as_str() {
-            "wings" => { stats.attack += 10 + progress * 3; stats.crit_rate = (stats.crit_rate + progress as f64 * 0.002).min(1.0); }
-            "mount" => { stats.hp += 50 + progress * 20; stats.defense += 5 + progress * 2; }
+            // 🪶 Asas (foco ATK/CRIT/DMG): T8 +200% ALL
+            "wings" => {
+                stats.attack += 10 + progress * 3;
+                stats.crit_rate = (stats.crit_rate + progress as f64 * 0.002).min(1.0);
+                stats.crit_damage += tier_f * 0.04 + progress as f64 * 0.001;
+            }
+            // 🐴 Montaria (SPD/Clear): HP/DEF + clear
+            "mount" => {
+                stats.hp += 50 + progress * 20;
+                stats.defense += 5 + progress * 2;
+                stats.attack_speed += tier_f * 0.02;
+            }
+            // 🐾 Pet (utility)
+            "pet" => {
+                stats.luck += (progress as f64 * 0.0015).min(0.25);
+                stats.attack += 5 + progress * 2;
+                stats.hp += 20 + progress * 8;
+            }
+            // 💫 Aura (DEF/HP)
+            "aura" => {
+                stats.defense += 8 + progress * 3;
+                stats.hp += 30 + progress * 12;
+            }
+            // 🎭 Máscara (CRIT/PEN)
+            "mask" => {
+                stats.crit_rate = (stats.crit_rate + progress as f64 * 0.0015).min(1.0);
+                stats.crit_damage += tier_f * 0.03;
+                stats.penetration = (stats.penetration + progress as f64 * 0.0012).min(0.9);
+            }
+            // ✨ Trail (DODGE/SPD)
+            "trail" => {
+                stats.dodge = (stats.dodge + progress as f64 * 0.0018).min(0.75);
+                stats.attack_speed += progress as f64 * 0.004;
+            }
+            // 💥 Hit Effect (DMG procs)
+            "hit_effect" => {
+                stats.attack += 8 + progress * 2;
+                stats.penetration = (stats.penetration + tier_f * 0.01).min(0.9);
+            }
+            // 🌀 Frame (EXP/Drop) — também dá stats mínimos para Power
+            "frame" => {
+                stats.luck += (progress as f64 * 0.001).min(0.15);
+                stats.hp += 15 + progress * 5;
+            }
             _ => {}
         }
     }
+    // Clamps finais antes do Power Rating
+    stats.attack_speed = stats.attack_speed.clamp(0.1, 20.0);
+    stats.crit_rate = stats.crit_rate.clamp(0.0, 1.0);
+    stats.crit_damage = stats.crit_damage.max(1.0);
+    stats.luck = stats.luck.clamp(0.0, 1.0);
+    stats.dodge = stats.dodge.clamp(0.0, 0.75);
+    stats.penetration = stats.penetration.clamp(0.0, 0.9);
     stats.power_rating = power_rating(stats);
 }
 
@@ -151,9 +201,55 @@ pub async fn recalculate(
         },
         &items,
     );
+    // Awakening: multiplicador permanente sobre stats base (1: +50%, 2:+100%, 3:+200%, 4:+400%, 5:+800%)
+    let awakening: i16 = sqlx::query_scalar("SELECT awakening FROM characters WHERE id=$1").bind(character_id).fetch_one(&mut **tx).await.unwrap_or(0);
+    let mult = match awakening { 0=>1.0, 1=>1.5, 2=>2.0, 3=>3.0, 4=>5.0, 5=>9.0, _=>1.0 };
+    if mult != 1.0 {
+        stats.hp = (stats.hp as f64 * mult) as i64;
+        stats.attack = (stats.attack as f64 * mult) as i64;
+        stats.defense = (stats.defense as f64 * mult) as i64;
+    }
+    // Skills: 1 ponto por level, 3 branches. Cada nível dá bônus branch-específico.
+    let skills: Vec<(String,i16,String)> = sqlx::query_as("SELECT cs.skill_code, cs.level, st.branch FROM character_skills cs JOIN skill_trees st ON st.skill_code=cs.skill_code WHERE cs.character_id=$1")
+        .bind(character_id).fetch_all(&mut **tx).await.unwrap_or_default();
+    for (_, lvl, branch) in &skills {
+        let l = *lvl as f64;
+        match branch.as_str() {
+            "offensive" => { stats.attack += (l * 4.0) as i64; stats.crit_rate = (stats.crit_rate + l*0.008).min(1.0); },
+            "defensive" => { stats.hp += (l * 30.0) as i64; stats.defense += (l * 8.0) as i64; },
+            "utility" => { stats.attack_speed += l*0.02; stats.dodge = (stats.dodge + l*0.01).min(0.75); stats.crit_damage += l*0.03; },
+            _=> {}
+        }
+    }
     let cosmetics: Vec<(String, i16, i16)> = sqlx::query_as("SELECT cosmetic_type,tier,stars FROM cosmetic_progress WHERE user_id=$1")
         .bind(user_id).fetch_all(&mut **tx).await?;
     apply_cosmetics(&mut stats, &cosmetics);
+    // Runas (sockets) — bônus diretos se item equipado tem runa
+    let runes: Vec<(serde_json::Value,)> = sqlx::query_as("SELECT r.bonus FROM item_sockets s JOIN runes r ON r.id=s.rune_id JOIN equipment_slots e ON e.inventory_item_id=s.inventory_item_id WHERE e.character_id=$1")
+        .bind(character_id).fetch_all(&mut **tx).await.unwrap_or_default();
+    for (bonus,) in runes {
+        apply_item(&mut stats, &bonus, 1.0);
+    }
+    // Set bônus: conta peças equipadas por set
+    let sets: Vec<(String, i64)> = sqlx::query_as("SELECT COALESCE(t.code, 'unknown'), COUNT(*) FROM equipment_slots e JOIN inventory_items i ON i.id=e.inventory_item_id JOIN item_templates t ON t.id=i.template_id WHERE e.character_id=$1 GROUP BY t.code")
+        .bind(character_id).fetch_all(&mut **tx).await.unwrap_or_default();
+    // Simplificado: a cada 2/4/6 peças do mesmo prefixo (forest/desert/abyss) aplica bônus
+    for (code, count) in sets {
+        let set = if code.contains("forest") { "forest" } else if code.contains("desert") { "desert" } else if code.contains("abyss") { "abyss" } else { continue };
+        let bonuses: Vec<(i16, serde_json::Value)> = sqlx::query_as("SELECT required_pieces, bonus FROM set_bonuses WHERE set_code=$1 AND required_pieces <= $2 ORDER BY required_pieces")
+            .bind(set).bind(count as i16).fetch_all(&mut **tx).await.unwrap_or_default();
+        for (_, bonus) in bonuses {
+            apply_item(&mut stats, &bonus, 1.0);
+        }
+    }
+    // Clamps finais já feitos em apply_cosmetics, mas reforça
+    stats.attack_speed = stats.attack_speed.clamp(0.1, 20.0);
+    stats.crit_rate = stats.crit_rate.clamp(0.0, 1.0);
+    stats.crit_damage = stats.crit_damage.max(1.0);
+    stats.luck = stats.luck.clamp(0.0, 1.0);
+    stats.dodge = stats.dodge.clamp(0.0, 0.75);
+    stats.penetration = stats.penetration.clamp(0.0, 0.9);
+    stats.power_rating = power_rating(&stats);
     sqlx::query("UPDATE character_stats SET hp=$2,attack=$3,defense=$4,attack_speed=$5,crit_rate=$6,crit_damage=$7,luck=$8,accuracy=$9,dodge=$10,penetration=$11,power_rating=$12,calculated_at=now() WHERE character_id=$1")
         .bind(character_id)
         .bind(stats.hp)

@@ -33,6 +33,14 @@ pub async fn grant_leader_experience(
         let (hp, attack, defense) = base_for_class(&class, level);
         sqlx::query("UPDATE character_base_stats SET hp=$2,attack=$3,defense=$4 WHERE character_id=$1")
             .bind(character_id).bind(hp).bind(attack).bind(defense).execute(&mut **tx).await?;
+        // Skill points: 1 por level (level-1 total). Atualiza available se já existe linha.
+        let new_total = (level - 1).max(0);
+        let old_total = (old_level - 1).max(0);
+        let diff = new_total - old_total;
+        if diff > 0 {
+            sqlx::query("INSERT INTO character_skill_points (character_id, available, total_earned) VALUES ($1,$2,$2) ON CONFLICT (character_id) DO UPDATE SET available=character_skill_points.available+$2, total_earned=character_skill_points.total_earned+$2, updated_at=now()")
+                .bind(character_id).bind(diff).execute(&mut **tx).await?;
+        }
         recalculate(tx, user_id, character_id).await?;
         Ok(Some(level))
     } else { Ok(None) }
@@ -42,6 +50,9 @@ pub fn base_for_class(class: &str, level: i16) -> (i64, i64, i64) {
     let (hp, attack, defense) = match class {
         "warrior" => (1500.0, 110.0, 180.0),
         "archer" => (800.0, 180.0, 70.0),
+        "mage" => (900.0, 190.0, 60.0),
+        "assassin" => (1000.0, 210.0, 85.0),
+        "support" => (1100.0, 90.0, 110.0),
         _ => (1000.0, 150.0, 100.0),
     };
     let steps = f64::from(level.saturating_sub(1));

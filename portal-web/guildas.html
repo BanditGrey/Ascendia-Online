@@ -1,0 +1,10 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><title>Guildas — Ascendia</title><style>body{background:#0a0a0f;color:#e8e8ea;font:14px system-ui;margin:0}header{padding:16px 24px;border-bottom:1px solid #252538} .card{background:#16161f;border:1px solid #252538;border-radius:12px;padding:16px;margin:16px;max-width:800px}input,button{padding:8px 12px;border-radius:8px;border:1px solid #252538;background:#0f0f16;color:#e8e8ea}</style></head><body>
+<header><b>Guildas</b> — 30→50 Lv1-50 — <a href="index.html" style="color:#ffcc33">Portal</a></header>
+<div class="card"><input id="gname" placeholder="Nome da guilda 3-40 (1000 Gold Lv20)"><button onclick="createG()">Criar</button> <button onclick="list()">Listar</button><pre id="out">...</pre></div>
+<div class="card"><h3>Territórios</h3><pre id="terr">...</pre></div>
+<script>
+async function createG(){let n=document.getElementById("gname").value;let t=localStorage.getItem("mock_token");let r=await fetch("/api/v1/guilds",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+t},body:JSON.stringify({name:n})}).then(x=>x.json());document.getElementById("out").textContent=JSON.stringify(r,null,2)}
+async function list(){let r=await fetch("/api/v1/guilds",{headers:{Authorization:"Bearer "+localStorage.getItem("mock_token")}}).then(x=>x.json());document.getElementById("out").textContent=JSON.stringify(r,null,2)}
+fetch("/api/v1/guild-war/territories").then(r=>r.json()).then(j=>document.getElementById("terr").textContent=JSON.stringify(j,null,2))
+</script>
+</body></html>
