@@ -1,33 +1,52 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ilha do Abismo — Ascendia</title>
-<style>:root{--bg:#0a1620;--card:#111f2e;--line:#1e3347;--accent:#4dd0e1;--text:#e0f7fa;--muted:#8ab4c0}*{box-sizing:border-box}body{margin:0;background:radial-gradient(800px 400px at 50% 0%, #0e2a3a 0%, #0a1620 60%);color:var(--text);font:14px system-ui}header{padding:16px 24px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;backdrop-filter:blur(8px);background:rgba(10,22,32,.8)}header a{color:var(--text);text-decoration:none;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:12px}.hero{max-width:1100px;margin:24px auto;padding:0 24px;display:grid;grid-template-columns:1.1fr .9fr;gap:24px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}.btn{display:inline-block;padding:10px 16px;border-radius:999px;background:var(--accent);color:#0a1620;font-weight:700;text-decoration:none;border:1px solid var(--accent)}.grid{max-width:1100px;margin:24px auto;padding:0 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}code{background:#0f1f2e;padding:2px 6px;border-radius:6px;border:1px solid var(--line);font-size:12px}</style>
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ilhas — Ascendia</title>
+<style>:root{--bg:#0a1620;--card:#111f2e;--line:#1e3347;--accent:#4dd0e1;--accent2:#ffcc33;--text:#e0f7fa;--muted:#8ab4c0}*{box-sizing:border-box}body{margin:0;background:radial-gradient(900px 500px at 50% 0%, #0e2a3a 0%, #0a1620 65%);color:var(--text);font:14px system-ui}header{padding:16px 24px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;backdrop-filter:blur(8px);background:rgba(10,22,32,.85)}header a{color:var(--text);text-decoration:none;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:12px}.tabs{max-width:1100px;margin:16px auto 0;padding:0 24px;display:flex;gap:8px}.tab{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:13px}.tab.active{background:var(--accent);color:#0a1620;border-color:var(--accent);font-weight:700}.tab.gold.active{background:var(--accent2);color:#111;border-color:var(--accent2)}.hero{max-width:1100px;margin:16px auto;padding:0 24px;display:grid;grid-template-columns:1.1fr .9fr;gap:24px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}.btn{display:inline-block;padding:10px 16px;border-radius:999px;background:var(--accent);color:#0a1620;font-weight:700;text-decoration:none;border:1px solid var(--accent);cursor:pointer}.btn.gold{background:var(--accent2);color:#111;border-color:var(--accent2)}.grid{max-width:1100px;margin:16px auto;padding:0 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}code{background:#0f1f2e;padding:2px 6px;border-radius:6px;border:1px solid var(--line);font-size:12px}pre{background:#0f1f2e;padding:12px;border-radius:8px;border:1px solid var(--line);overflow:auto}</style>
 </head><body>
-<header><b>🏝️ Ilha do Abismo Profundo</b> — 501-550 <a href="index.html">Portal</a> <a href="https://8001-i26fgc5pp3omxssa0zcnx.e2b.app/portal/index.html" target="_blank">Jogar</a> <span style="margin-left:auto;color:var(--muted)">Requer Fase 500 + 5000 Gold</span></header>
+<header><b>🏝️ Ilhas Pós-500</b> <a href="index.html">Portal</a> <a href="https://8002-i26fgc5pp3omxssa0zcnx.e2b.app/portal/index.html" target="_blank">Jogar</a> <span style="margin-left:auto;color:var(--muted)">2 ilhas • 501-600 • 6 mobs + 2 Leviatãs</span></header>
+<div class="tabs">
+  <div class="tab active" id="tab11" onclick="show(11)">Ilha 11 — Abismo 501-550</div>
+  <div class="tab gold" id="tab12" onclick="show(12)">Ilha 12 — Reino Dourado 551-600 👑</div>
+</div>
+<div id="ilha11">
 <div class="hero">
   <div>
-    <div style="display:inline-block;padding:4px 8px;border-radius:999px;background:#0f2a3a;border:1px solid #1e4a5a;font-size:11px">NOVO CONTEÚDO PÓS-500 • 3 MOBS + LEVIATÃ 550 • LOOT PRIMORDIAL</div>
-    <h2 style="font-size:28px;margin:12px 0 8px">Abismo aquático bioluminescente</h2>
-    <p style="color:var(--muted)">Desbloqueie via portal pagando 5000 Gold após completar <code>Origem Primordial 500 O Criador</code>. Mobs: <code>abyssal_horror</code> <code>deep_one</code> <code>leviathan_spawn</code> — Boss: <b>Leviatã Ancião 550</b> — Loot: <code>Lâmina Abissal</code> <code>Coração do Abismo</code> <code>Coroa do Leviatã</code> + Skins <code>Asas Abissais</code></p>
-    <div style="display:flex;gap:12px;margin-top:16px">
-      <a class="btn" href="#" onclick="unlock();return false">🔓 Desbloquear Ilha (5000 Gold)</a>
-      <a class="btn" style="background:transparent;color:var(--text);border-color:var(--line)" href="#" onclick="enter();return false">⚔️ Entrar 501</a>
-    </div>
-    <pre id="status" style="background:#0f1f2e;padding:12px;border-radius:8px;border:1px solid var(--line);margin-top:12px">Carregando status...</pre>
+    <div style="display:inline-block;padding:4px 8px;border-radius:999px;background:#0f2a3a;border:1px solid #1e4a5a;font-size:11px">ABISMO • 3 MOBS + LEVIATÃ 550</div>
+    <h2 style="font-size:26px;margin:12px 0 8px">Abismo aquático bioluminescente</h2>
+    <p style="color:var(--muted)">Requer <code>Fase 500</code> + <code>5000 Gold</code>. Mobs <code>abyssal_horror</code> <code>deep_one</code> <code>leviathan_spawn</code> — Boss <b>Leviatã Ancião 550</b> — Loot <code>Lâmina Abissal</code> <code>Coração do Abismo</code> <code>Coroa do Leviatã</code></p>
+    <div style="display:flex;gap:12px;margin-top:16px"><a class="btn" href="#" onclick="unlock('abyss_island');return false">🔓 Desbloquear 5000 Gold</a><a class="btn" style="background:transparent;color:var(--text)" href="#" onclick="enter(501);return false">⚔️ Entrar 501</a></div>
+    <pre id="status11">Carregando...</pre>
   </div>
-  <div class="card">
-    <h3 style="margin:0 0 8px;color:var(--accent)">Requisitos</h3>
-    <div id="req">Verificando...</div>
-  </div>
+  <div class="card"><h3 style="color:var(--accent)">Requisitos Abismo</h3><div id="req11">Verificando...</div><div style="margin-top:12px;font-size:11px;color:var(--muted)">Corais 3 variações 2.6KB • GLB bioluminescente</div></div>
 </div>
-<div class="grid">
-  <div class="card"><h3>👾 Mobs Ilha</h3><p style="color:var(--muted)"><code>abyssal_horror</code> 7.4KB<br><code>deep_one</code> 6.0KB<br><code>leviathan_spawn</code> 8.3KB</p></div>
-  <div class="card"><h3>👑 Boss 550</h3><p style="color:var(--muted)">Leviatã Ancião 2.3KB box 1.6×0.9 + 2 barbatanas + 2 chifres. Drop Primordial.</p></div>
-  <div class="card"><h3>🎁 Skins Ilha</h3><p style="color:var(--muted)">Asas Abissais, Leviatã, Kraken Bebê — tradáveis.</p></div>
+<div class="grid"><div class="card"><h3>👾 Mobs 11</h3><p style="color:var(--muted)">abyssal_horror 7.4KB<br>deep_one 6.0KB<br>leviathan_spawn 8.3KB</p></div><div class="card"><h3>👑 Boss 550</h3><p style="color:var(--muted)">Leviatã 2.3KB + 2 barbatanas + 2 chifres</p></div><div class="card"><h3>🎁 Skins 11</h3><p style="color:var(--muted)">Asas Abissais, Leviatã, Kraken — tradáveis</p></div></div>
+</div>
+<div id="ilha12" style="display:none">
+<div class="hero">
+  <div>
+    <div style="display:inline-block;padding:4px 8px;border-radius:999px;background:#2a1f0a;border:1px solid #5a4a1a;font-size:11px">REINO DOURADO • 3 MOBS + REI 600 • VIP 5</div>
+    <h2 style="font-size:26px;margin:12px 0 8px;color:var(--accent2)">Reino Dourado flutuante</h2>
+    <p style="color:var(--muted)">Requer <code>Ilha 11 + Fase 550 + 8000 Gold + VIP 5</code>. Mobs <code>golden_golem</code> <code>treasure_mimic</code> <code>golden_phoenix</code> — Boss <b style="color:var(--accent2)">Rei Dourado 600</b> — Loot <code>Lâmina Dourada</code> <code>Armadura do Rei</code> <code>Coroa Dourada Suprema</code> <span style="color:var(--accent2)">Primordial</span></p>
+    <div style="display:flex;gap:12px;margin-top:16px"><a class="btn gold" href="#" onclick="unlock('golden_kingdom');return false">🔓 Desbloquear 8000 Gold + VIP5</a><a class="btn" style="background:transparent;color:var(--text)" href="#" onclick="enter(551);return false">⚔️ Entrar 551</a></div>
+    <pre id="status12">Carregando...</pre>
+  </div>
+  <div class="card" style="border-color:#5a4a1a"><h3 style="color:var(--accent2)">Requisitos Dourado</h3><div id="req12">Verificando...</div><div style="margin-top:12px;font-size:11px;color:var(--muted)">Pilares dourados 3 variações 1.7KB • Templo flutuante</div></div>
+</div>
+<div class="grid"><div class="card"><h3>👾 Mobs 12</h3><p style="color:var(--muted)">golden_golem 4.4KB<br>treasure_mimic 4.4KB<br>golden_phoenix 6.3KB asas</p></div><div class="card"><h3>👑 Boss 600</h3><p style="color:var(--muted)">Rei Dourado 2.0KB cape vermelha + crown ouro</p></div><div class="card"><h3>🎁 Skins 12</h3><p style="color:var(--muted)">Asas Douradas, Fênix Dourada, Frame Dourado</p></div></div>
 </div>
 <script>
+function show(n){document.getElementById('ilha11').style.display=n==11?'block':'none';document.getElementById('ilha12').style.display=n==12?'block':'none';document.getElementById('tab11').classList.toggle('active',n==11);document.getElementById('tab12').classList.toggle('active',n==12)}
 async function api(p,opts={}){let t=localStorage.getItem("mock_token");if(t)opts.headers={...(opts.headers||{}),Authorization:"Bearer "+t,"Content-Type":"application/json"};let r=await fetch(p,opts);return r.json()}
-async function load(){let s=await fetch("/api/v1/island/status",{headers:{Authorization:"Bearer "+(localStorage.getItem("mock_token")||"mock")}}).then(r=>r.json()).catch(()=>({max_stage:0,gold:0,can_unlock:false}));document.getElementById("status").textContent=JSON.stringify(s,null,2);document.getElementById("req").innerHTML=`Fase ${s.max_stage||0}/500 — Gold ${s.gold||0}/5000 — ${s.can_unlock?"<b style='color:#4dd0e1'>Pronto para desbloquear</b>":"Bloqueado"}`;}
-async function unlock(){let r=await api("/api/v1/island/unlock",{method:"POST"});alert(JSON.stringify(r));load()}
-async function enter(){let r=await api("/api/v1/island/enter/501",{method:"POST"});alert(JSON.stringify(r))}
+async function load(){
+  let s=await fetch("/api/v1/island/status",{headers:{Authorization:"Bearer "+(localStorage.getItem("mock_token")||"mock")}}).then(r=>r.json()).catch(()=>[]);
+  let list=Array.isArray(s)?s:[s];
+  let abyss=list.find(x=>x.island=="abyss_island")||list[0]||{};
+  let gold=list.find(x=>x.island=="golden_kingdom")||{};
+  document.getElementById("status11").textContent=JSON.stringify(abyss,null,2);
+  document.getElementById("req11").innerHTML=`Fase ${abyss.max_stage||0}/500 — Gold ${abyss.gold||0}/5000 — ${abyss.can_unlock?"<b style='color:#4dd0e1'>Pronto</b>":abyss.unlocked?"Desbloqueado 501":"Bloqueado"}`;
+  document.getElementById("status12").textContent=JSON.stringify(gold,null,2);
+  document.getElementById("req12").innerHTML=`Fase ${gold.max_stage||0}/550 — Gold ${gold.gold||0}/8000 — VIP ${gold.vip||0}/5 — ${gold.can_unlock?"<b style='color:#ffcc33'>Pronto</b>":gold.unlocked?"Desbloqueado 551":"Bloqueado (precisa Abismo)"}`;
+}
+async function unlock(code){let r=await api("/api/v1/island/unlock/"+code,{method:"POST"});alert(JSON.stringify(r));load()}
+async function enter(stage){let r=await api("/api/v1/island/enter/"+stage,{method:"POST"});alert(JSON.stringify(r))}
 load()
 </script>
 </body></html>
